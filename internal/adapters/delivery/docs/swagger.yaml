@@ -1,0 +1,78 @@
+basePath: /api
+definitions:
+  request.MultipleChoiceDTO:
+    properties:
+      answer:
+        type: string
+      content:
+        type: string
+      id:
+        type: string
+      model:
+        type: string
+      options:
+        items:
+          type: string
+        type: array
+      organization:
+        type: string
+      question:
+        type: string
+      topic:
+        type: string
+      year:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.InfoResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact:
+    email: deveduardomelo@gmail.com
+    name: Eduardo Melo
+  description: Reserva de quartos para Hotéis
+  title: Reservify API
+  version: "1.0"
+paths:
+  /question:
+    post:
+      consumes:
+      - application/json
+      description: Cria uma questão de múltipla escolha, onde só é possível uma resposta
+        correta
+      parameters:
+      - description: Dados da questão de múltipla escolha
+        in: body
+        name: question
+        required: true
+        schema:
+          $ref: '#/definitions/request.MultipleChoiceDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Questão criada com sucesso
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Erro ao criar questão
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Cria uma questão de múltipla escolha
+      tags:
+      - Question
+securityDefinitions:
+  bearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
