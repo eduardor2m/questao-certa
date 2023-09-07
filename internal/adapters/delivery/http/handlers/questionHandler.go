@@ -54,6 +54,120 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Question created successfully"})
 }
 
+// @Summary Lista todas as questões
+// @Description Lista todas as questões
+// @Tags Question
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Success 200 {array} response.MultipleChoice
+// @Failure 400 {object} response.Error
+// @Router /question [get]
+func (instance QuestionHandler) ListQuestions(context echo.Context) error {
+	questions, err := instance.service.ListQuestions()
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	var questionsDTO []response.MultipleChoice
+
+	for _, question := range questions {
+		questionDTO := response.MultipleChoice{
+			ID:           question.ID(),
+			Organization: question.Organization(),
+			Model:        question.Model(),
+			Year:         question.Year(),
+			Content:      question.Content(),
+			Topic:        question.Topic(),
+			Question:     question.Question(),
+			Options:      question.Options(),
+			Answer:       question.Answer(),
+		}
+
+		questionsDTO = append(questionsDTO, questionDTO)
+	}
+
+	return context.JSON(http.StatusOK, questionsDTO)
+}
+
+// @Summary Lista todas as questões de uma organização
+// @Description Lista todas as questões de uma organização
+// @Tags Question
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Param organization path string true "Nome da organização"
+// @Success 200 {array} response.MultipleChoice
+// @Failure 400 {object} response.Error
+// @Router /question/{organization} [get]
+func (instance QuestionHandler) ListQuestionsByOrganization(context echo.Context) error {
+	organization := context.Param("organization")
+
+	questions, err := instance.service.ListQuestionsByOrganization(organization)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	var questionsDTO []response.MultipleChoice
+
+	for _, question := range questions {
+		questionDTO := response.MultipleChoice{
+			ID:           question.ID(),
+			Organization: question.Organization(),
+			Model:        question.Model(),
+			Year:         question.Year(),
+			Content:      question.Content(),
+			Topic:        question.Topic(),
+			Question:     question.Question(),
+			Options:      question.Options(),
+			Answer:       question.Answer(),
+		}
+
+		questionsDTO = append(questionsDTO, questionDTO)
+	}
+
+	return context.JSON(http.StatusOK, questionsDTO)
+}
+
+// @Summary Deleta uma questão
+// @Description Deleta uma questão
+// @Tags Question
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Param id path string true "ID da questão"
+// @Success 200 {object} response.Info
+// @Failure 400 {object} response.Error
+// @Router /question/{id} [delete]
+func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
+	id := context.Param("id")
+
+	err := instance.service.DeleteQuestion(id)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Question deleted successfully"})
+}
+
+// @Summary Deleta todas as questões
+// @Description Deleta todas as questões
+// @Tags Question
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Success 200 {object} response.Info
+// @Failure 400 {object} response.Error
+// @Router /question [delete]
+func (instance QuestionHandler) DeleteAllQuestions(context echo.Context) error {
+	err := instance.service.DeleteAllQuestions()
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Questions deleted successfully"})
+}
+
 func NewQuestionHandler(service primary.QuestionManager) *QuestionHandler {
 	return &QuestionHandler{
 		service: service,

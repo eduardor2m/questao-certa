@@ -6,4 +6,8 @@ import (
 
 type QuestionLoader interface {
 	CreateQuestion(Question multiplechoice.MultipleChoice) error
+	ListQuestions() ([]multiplechoice.MultipleChoice, error)
+	ListQuestionsByOrganization(organization string) ([]multiplechoice.MultipleChoice, error)
+	DeleteQuestion(id string) error
+	DeleteAllQuestions() error
 }

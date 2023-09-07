@@ -10,4 +10,8 @@ func loadQuestionRoutes(group *echo.Group) {
 	questionHandlers := dicontainer.GetQuestionHandler()
 
 	questionGroup.POST("", questionHandlers.CreateQuestion)
+	questionGroup.GET("", questionHandlers.ListQuestions)
+	questionGroup.GET("/:organization", questionHandlers.ListQuestionsByOrganization)
+	questionGroup.DELETE("/:id", questionHandlers.DeleteQuestion)
+	questionGroup.DELETE("", questionHandlers.DeleteAllQuestions)
 }

@@ -16,6 +16,22 @@ func (instance *QuestionServices) CreateQuestion(question multiplechoice.Multipl
 	return instance.questionRepository.CreateQuestion(question)
 }
 
+func (instance *QuestionServices) ListQuestions() ([]multiplechoice.MultipleChoice, error) {
+	return instance.questionRepository.ListQuestions()
+}
+
+func (instance *QuestionServices) ListQuestionsByOrganization(organization string) ([]multiplechoice.MultipleChoice, error) {
+	return instance.questionRepository.ListQuestionsByOrganization(organization)
+}
+
+func (instance *QuestionServices) DeleteQuestion(id string) error {
+	return instance.questionRepository.DeleteQuestion(id)
+}
+
+func (instance *QuestionServices) DeleteAllQuestions() error {
+	return instance.questionRepository.DeleteAllQuestions()
+}
+
 func NewQuestionServices(questionRepository repository.QuestionLoader) *QuestionServices {
 	return &QuestionServices{questionRepository: questionRepository}
 }
