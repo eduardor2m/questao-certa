@@ -7,6 +7,7 @@ import (
 
 type QuestionLoader interface {
 	CreateQuestion(Question multiplechoice.MultipleChoice) error
+	ImportQuestionsByCSV(questions []multiplechoice.MultipleChoice) error
 	ListQuestions() ([]multiplechoice.MultipleChoice, error)
 	ListQuestionsByFilter(filter filter.Filter) ([]multiplechoice.MultipleChoice, error)
 	DeleteQuestion(id string) error

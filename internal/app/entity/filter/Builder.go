@@ -29,6 +29,11 @@ func (instance *Builder) WithTopic(topic string) *Builder {
 	return instance
 }
 
+func (instance *Builder) WithQuantity(quantity int64) *Builder {
+	instance.quantity = quantity
+	return instance
+}
+
 func (instance *Builder) Build() (*Filter, error) {
 	if instance.Err != nil {
 		return nil, instance.Err

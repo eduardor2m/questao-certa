@@ -1,6 +1,11 @@
 package services
 
 import (
+	"encoding/csv"
+	"errors"
+	"mime/multipart"
+	"strings"
+
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question/multipleChoice"
@@ -39,7 +44,52 @@ func (instance *QuestionServices) ListQuestions() ([]multiplechoice.MultipleChoi
 	return instance.questionRepository.ListQuestions()
 }
 
+func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) error {
+	reader := csv.NewReader(file)
+	reader.Comma = ','
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	records = records[1:]
+
+	for _, record := range records {
+
+		id, err := uuid.NewUUID()
+		if err != nil {
+			return err
+		}
+
+		questionFormated, err := multiplechoice.NewBuilder().WithQuestion(record[0]).WithAnswer(record[1]).WithOptions(strings.Split(record[2], ",")).Build()
+		if err != nil {
+			return err
+		}
+
+		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[3]).WithModel(record[4]).WithYear(record[5]).WithContent(record[6]).WithTopic(record[7]).Build()
+		if err != nil {
+			return err
+		}
+
+		questionFormated.Base = *baseFormated
+
+		err = instance.questionRepository.CreateQuestion(*questionFormated)
+
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
 func (instance *QuestionServices) ListQuestionsByFilter(f filter.Filter) ([]multiplechoice.MultipleChoice, error) {
+	if f.Quantity() > 10 {
+		return nil, errors.New("quantity must be less than 10")
+	}
+
 	return instance.questionRepository.ListQuestionsByFilter(f)
 }
 

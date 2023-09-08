@@ -10,6 +10,7 @@ func loadQuestionRoutes(group *echo.Group) {
 	questionHandlers := dicontainer.GetQuestionHandler()
 
 	questionGroup.POST("", questionHandlers.CreateQuestion)
+	questionGroup.POST("/import", questionHandlers.ImportQuestionsByCSV)
 	questionGroup.GET("", questionHandlers.ListQuestions)
 	questionGroup.GET("/filter", questionHandlers.ListQuestionsByFilter)
 	questionGroup.DELETE("/:id", questionHandlers.DeleteQuestion)

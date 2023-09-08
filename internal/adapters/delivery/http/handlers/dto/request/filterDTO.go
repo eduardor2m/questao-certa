@@ -5,4 +5,5 @@ type FilterDTO struct {
 	Year         string `json:"year"`
 	Content      string `json:"content"`
 	Topic        string `json:"topic"`
+	Quantity     int64  `json:"quantity"`
 }
