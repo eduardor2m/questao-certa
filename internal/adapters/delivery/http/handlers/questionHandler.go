@@ -55,6 +55,35 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Question created successfully"})
 }
 
+// @Summary Importa questões de múltipla escolha
+// @Description Importa questões de múltipla escolha a partir de um arquivo CSV
+// @Tags Question
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Param file formData file true "Arquivo CSV com as questões de múltipla escolha"
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.Error
+// @Router /question/import [post]
+func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error {
+	file, err := context.FormFile("file")
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	fileOpened, err := file.Open()
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	err = instance.service.ImportQuestionsByCSV(fileOpened)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Questions imported successfully"})
+}
+
 // @Summary Lista todas as questões
 // @Description Lista todas as questões
 // @Tags Question
@@ -109,7 +138,7 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	filterFormated, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithContent(filterReceived.Content).WithTopic(filterReceived.Topic).Build()
+	filterFormated, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithContent(filterReceived.Content).WithTopic(filterReceived.Topic).WithQuantity(filterReceived.Quantity).Build()
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})

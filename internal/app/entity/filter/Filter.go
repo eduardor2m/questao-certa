@@ -5,6 +5,7 @@ type Filter struct {
 	year         string
 	topic        string
 	content      string
+	quantity     int64
 }
 
 func (instance *Filter) Organization() string {
@@ -21,4 +22,8 @@ func (instance *Filter) Topic() string {
 
 func (instance *Filter) Content() string {
 	return instance.content
+}
+
+func (instance *Filter) Quantity() int64 {
+	return instance.quantity
 }
