@@ -3,12 +3,12 @@ package base
 import "github.com/google/uuid"
 
 type Base struct {
-	id           uuid.UUID // Identificador único da questão.
-	organization string    // Organização ou banca que elaborou a questão.
-	model        string    // Modelo da questão (por exemplo, múltipla escolha, dissertativa, etc.).
-	year         string    // Ano em que a questão foi elaborada.
-	discipline   string    // Conteúdo da questão.
-	topic        string    // Tópico ou assunto ao qual a questão está relacionada.
+	id           uuid.UUID
+	organization string
+	model        string
+	year         string
+	discipline   string
+	topic        string
 }
 
 func (instance *Base) ID() uuid.UUID {
