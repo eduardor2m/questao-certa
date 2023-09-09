@@ -7,7 +7,7 @@ type Base struct {
 	organization string    // Organização ou banca que elaborou a questão.
 	model        string    // Modelo da questão (por exemplo, múltipla escolha, dissertativa, etc.).
 	year         string    // Ano em que a questão foi elaborada.
-	content      string    // Conteúdo da questão.
+	discipline   string    // Conteúdo da questão.
 	topic        string    // Tópico ou assunto ao qual a questão está relacionada.
 }
 
@@ -27,8 +27,8 @@ func (instance *Base) Year() string {
 	return instance.year
 }
 
-func (instance *Base) Content() string {
-	return instance.content
+func (instance *Base) Discipline() string {
+	return instance.discipline
 }
 
 func (instance *Base) Topic() string {

@@ -6,8 +6,8 @@ import (
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/response"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
+	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question/multipleChoice"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/primary"
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +34,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	baseReceived, err := base.NewBuilder().WithOrganization(multipleChoiceDTO.Organization).WithModel(multipleChoiceDTO.Model).WithYear(multipleChoiceDTO.Year).WithContent(multipleChoiceDTO.Content).WithTopic(multipleChoiceDTO.Topic).Build()
+	baseReceived, err := base.NewBuilder().WithOrganization(multipleChoiceDTO.Organization).WithModel(multipleChoiceDTO.Model).WithYear(multipleChoiceDTO.Year).WithDiscipline(multipleChoiceDTO.Discipline).WithTopic(multipleChoiceDTO.Topic).Build()
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -107,7 +107,7 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 			Organization: question.Organization(),
 			Model:        question.Model(),
 			Year:         question.Year(),
-			Content:      question.Content(),
+			Discipline:   question.Discipline(),
 			Topic:        question.Topic(),
 			Question:     question.Question(),
 			Options:      question.Options(),
@@ -138,7 +138,7 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	filterFormated, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithContent(filterReceived.Content).WithTopic(filterReceived.Topic).WithQuantity(filterReceived.Quantity).Build()
+	filterFormated, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithDiscipline(filterReceived.Discipline).WithTopic(filterReceived.Topic).WithQuantity(filterReceived.Quantity).Build()
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -157,7 +157,7 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 			Organization: question.Organization(),
 			Model:        question.Model(),
 			Year:         question.Year(),
-			Content:      question.Content(),
+			Discipline:   question.Discipline(),
 			Topic:        question.Topic(),
 			Question:     question.Question(),
 			Options:      question.Options(),

@@ -5,8 +5,8 @@ import (
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
+	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question/multipleChoice"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,7 +30,7 @@ func formater(c *mongo.Cursor, ctx context.Context) ([]multiplechoice.MultipleCh
 	var multipleChoicesDB []multiplechoice.MultipleChoice
 
 	for _, question := range questions {
-		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithContent(question.Content).WithTopic(question.Topic).Build()
+		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithDiscipline(question.Discipline).WithTopic(question.Topic).Build()
 
 		if err != nil {
 			return nil, err
@@ -62,7 +62,7 @@ func (instance *QuestionMongodbRepository) CreateQuestion(Question multiplechoic
 		"organization": Question.Organization(),
 		"model":        Question.Model(),
 		"year":         Question.Year(),
-		"content":      Question.Content(),
+		"discipline":   Question.Discipline(),
 		"topic":        Question.Topic(),
 		"question":     Question.Question(),
 		"answer":       Question.Answer(),
@@ -93,7 +93,7 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questions []mult
 			"organization": question.Organization(),
 			"model":        question.Model(),
 			"year":         question.Year(),
-			"content":      question.Content(),
+			"discipline":   question.Discipline(),
 			"topic":        question.Topic(),
 			"question":     question.Question(),
 			"answer":       question.Answer(),
@@ -133,7 +133,7 @@ func (instance *QuestionMongodbRepository) ListQuestions() ([]multiplechoice.Mul
 	var multipleChoicesDB []multiplechoice.MultipleChoice
 
 	for _, question := range questions {
-		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithContent(question.Content).WithTopic(question.Topic).Build()
+		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithDiscipline(question.Discipline).WithTopic(question.Topic).Build()
 		if err != nil {
 			return nil, err
 		}
@@ -167,17 +167,17 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		findOptions.SetLimit(3)
 	}
 
-	if f.Organization() == "" && f.Year() == "" && f.Topic() == "" && f.Content() == "" {
+	if f.Organization() == "" && f.Year() == "" && f.Topic() == "" && f.Discipline() == "" {
 		return []multiplechoice.MultipleChoice{}, nil
 	} else if f.Organization() == "" && f.Year() == "" && f.Topic() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
 
 		return formater(cursor, ctx)
 
-	} else if f.Organization() == "" && f.Year() == "" && f.Content() == "" {
+	} else if f.Organization() == "" && f.Year() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"topic": f.Topic()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -185,7 +185,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 		return formater(cursor, ctx)
 
-	} else if f.Organization() == "" && f.Topic() == "" && f.Content() == "" {
+	} else if f.Organization() == "" && f.Topic() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -193,7 +193,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 		return formater(cursor, ctx)
 
-	} else if f.Year() == "" && f.Topic() == "" && f.Content() == "" {
+	} else if f.Year() == "" && f.Topic() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -202,7 +202,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Organization() == "" && f.Year() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"topic": f.Topic(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"topic": f.Topic(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
@@ -210,14 +210,14 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Organization() == "" && f.Topic() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
 
 		return formater(cursor, ctx)
 
-	} else if f.Organization() == "" && f.Content() == "" {
+	} else if f.Organization() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year(), "topic": f.Topic()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -226,14 +226,14 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Year() == "" && f.Topic() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
 
 		return formater(cursor, ctx)
 
-	} else if f.Year() == "" && f.Content() == "" {
+	} else if f.Year() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "topic": f.Topic()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -241,7 +241,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 		return formater(cursor, ctx)
 
-	} else if f.Topic() == "" && f.Content() == "" {
+	} else if f.Topic() == "" && f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -250,7 +250,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Organization() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year(), "topic": f.Topic(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"year": f.Year(), "topic": f.Topic(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
@@ -258,7 +258,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Year() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "topic": f.Topic(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "topic": f.Topic(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
@@ -266,14 +266,14 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return formater(cursor, ctx)
 
 	} else if f.Topic() == "" {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
 
 		return formater(cursor, ctx)
 
-	} else if f.Content() == "" {
+	} else if f.Discipline() == "" {
 		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year(), "topic": f.Topic()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
@@ -281,7 +281,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 		return formater(cursor, ctx)
 	} else {
-		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year(), "topic": f.Topic(), "content": f.Content()}, findOptions)
+		cursor, err := conn.Collection("questions").Find(ctx, bson.M{"organization": f.Organization(), "year": f.Year(), "topic": f.Topic(), "discipline": f.Discipline()}, findOptions)
 		if err != nil {
 			return []multiplechoice.MultipleChoice{}, err
 		}
