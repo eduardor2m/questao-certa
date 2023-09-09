@@ -4,7 +4,7 @@ type Filter struct {
 	organization string
 	year         string
 	topic        string
-	content      string
+	discipline   string
 	quantity     int64
 }
 
@@ -20,8 +20,8 @@ func (instance *Filter) Topic() string {
 	return instance.topic
 }
 
-func (instance *Filter) Content() string {
-	return instance.content
+func (instance *Filter) Discipline() string {
+	return instance.discipline
 }
 
 func (instance *Filter) Quantity() int64 {

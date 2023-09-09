@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question/multipleChoice"
+	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
 )
 
 type QuestionManager interface {

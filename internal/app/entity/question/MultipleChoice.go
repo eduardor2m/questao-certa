@@ -6,9 +6,9 @@ import (
 
 type MultipleChoice struct {
 	base.Base
-	question string   // Enunciado da questão.
-	options  []string // Opções de resposta.
-	answer   string   // Resposta correta.
+	question string
+	options  []string
+	answer   string
 }
 
 func (instance *MultipleChoice) Question() string {

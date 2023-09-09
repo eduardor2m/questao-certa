@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
+	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question/multipleChoice"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/primary"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
 	"github.com/google/uuid"
@@ -31,7 +31,7 @@ func (instance *QuestionServices) CreateQuestion(question multiplechoice.Multipl
 		return err
 	}
 
-	baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(question.Organization()).WithModel(question.Model()).WithYear(question.Year()).WithContent(question.Content()).WithTopic(question.Topic()).Build()
+	baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(question.Organization()).WithModel(question.Model()).WithYear(question.Year()).WithDiscipline(question.Discipline()).WithTopic(question.Topic()).Build()
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 			return err
 		}
 
-		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithContent(record[3]).WithTopic(record[4]).Build()
+		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithDiscipline(record[3]).WithTopic(record[4]).Build()
 		if err != nil {
 			return err
 		}

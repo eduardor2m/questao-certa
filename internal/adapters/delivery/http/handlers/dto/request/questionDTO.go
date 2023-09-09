@@ -7,7 +7,7 @@ type MultipleChoiceDTO struct {
 	Organization string    `json:"organization"`
 	Model        string    `json:"model"`
 	Year         string    `json:"year"`
-	Content      string    `json:"content"`
+	Discipline   string    `json:"discipline"`
 	Topic        string    `json:"topic"`
 	Question     string    `json:"question"`
 	Options      []string  `json:"options"`
