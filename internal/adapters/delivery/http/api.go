@@ -1,10 +1,13 @@
 package http
 
 import (
+	"net/http"
 	"os"
 
+	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/middlewares"
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/routes"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type API interface {
@@ -45,6 +48,7 @@ func (instance *api) Serve() {
 	instance.loadRoutes()
 	port := os.Getenv("SERVER_PORT")
 
+	instance.echoInstance.Use(instance.getCORSSettings())
 	instance.echoInstance.Logger.Fatal(instance.echoInstance.Start(":" + port))
 }
 
@@ -52,4 +56,19 @@ func (instance *api) loadRoutes() {
 	router := routes.New()
 
 	router.Load(instance.group)
+}
+
+func (instance *api) getCORSSettings() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		Skipper:         middlewares.OriginInspectSkipper,
+		AllowOriginFunc: middlewares.VerifyOrigin,
+		AllowMethods: []string{
+			http.MethodHead,
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodPatch,
+		},
+	})
 }

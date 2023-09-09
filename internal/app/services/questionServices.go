@@ -62,12 +62,12 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 			return err
 		}
 
-		questionFormated, err := multiplechoice.NewBuilder().WithQuestion(record[0]).WithAnswer(record[1]).WithOptions(strings.Split(record[2], ",")).Build()
+		questionFormated, err := multiplechoice.NewBuilder().WithQuestion(record[5]).WithAnswer(record[6]).WithOptions(strings.Split(record[7], ";;")).Build()
 		if err != nil {
 			return err
 		}
 
-		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[3]).WithModel(record[4]).WithYear(record[5]).WithContent(record[6]).WithTopic(record[7]).Build()
+		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithContent(record[3]).WithTopic(record[4]).Build()
 		if err != nil {
 			return err
 		}
