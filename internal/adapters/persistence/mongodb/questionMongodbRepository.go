@@ -5,7 +5,7 @@ import (
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
+	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,37 +19,37 @@ type QuestionMongodbRepository struct {
 	connectorManager
 }
 
-func formater(c *mongo.Cursor, ctx context.Context) ([]multiplechoice.MultipleChoice, error) {
-	var questions []request.MultipleChoiceDTO
+func formatter(c *mongo.Cursor, ctx context.Context) ([]question.Question, error) {
+	var questionsDB []request.QuestionDTO
 
-	err := c.All(ctx, &questions)
+	err := c.All(ctx, &questionsDB)
 	if err != nil {
 		return nil, err
 	}
 
-	var multipleChoicesDB []multiplechoice.MultipleChoice
+	var questionFormattedDB []question.Question
 
-	for _, question := range questions {
-		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithDiscipline(question.Discipline).WithTopic(question.Topic).Build()
+	for _, questionDB := range questionsDB {
+		baseFormatted, err := base.NewBuilder().WithID(questionDB.ID).WithOrganization(questionDB.Organization).WithModel(questionDB.Model).WithYear(questionDB.Year).WithDiscipline(questionDB.Discipline).WithTopic(questionDB.Topic).Build()
 
 		if err != nil {
 			return nil, err
 		}
 
-		multipleChoice, err := multiplechoice.NewBuilder().WithQuestion(question.Question).WithAnswer(question.Answer).WithOptions(question.Options).Build()
+		questionFormatted, err := question.NewBuilder().WithQuestion(questionDB.Question).WithAnswer(questionDB.Answer).WithOptions(questionDB.Options).Build()
 		if err != nil {
 			return nil, err
 		}
 
-		multipleChoice.Base = *baseReceived
+		questionFormatted.Base = *baseFormatted
 
-		multipleChoicesDB = append(multipleChoicesDB, *multipleChoice)
+		questionFormattedDB = append(questionFormattedDB, *questionFormatted)
 	}
 
-	return multipleChoicesDB, nil
+	return questionFormattedDB, nil
 }
 
-func (instance *QuestionMongodbRepository) CreateQuestion(Question multiplechoice.MultipleChoice) error {
+func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived question.Question) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
@@ -58,15 +58,15 @@ func (instance *QuestionMongodbRepository) CreateQuestion(Question multiplechoic
 	ctx := context.Background()
 
 	document := bson.M{
-		"id":           Question.ID(),
-		"organization": Question.Organization(),
-		"model":        Question.Model(),
-		"year":         Question.Year(),
-		"discipline":   Question.Discipline(),
-		"topic":        Question.Topic(),
-		"question":     Question.Question(),
-		"answer":       Question.Answer(),
-		"options":      Question.Options(),
+		"id":           questionReceived.ID(),
+		"organization": questionReceived.Organization(),
+		"model":        questionReceived.Model(),
+		"year":         questionReceived.Year(),
+		"discipline":   questionReceived.Discipline(),
+		"topic":        questionReceived.Topic(),
+		"question":     questionReceived.Question(),
+		"answer":       questionReceived.Answer(),
+		"options":      questionReceived.Options(),
 	}
 
 	_, err = conn.Collection("questions").InsertOne(ctx, document)
@@ -77,7 +77,7 @@ func (instance *QuestionMongodbRepository) CreateQuestion(Question multiplechoic
 	return nil
 }
 
-func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questions []multiplechoice.MultipleChoice) error {
+func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceived []question.Question) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
@@ -87,17 +87,17 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questions []mult
 
 	var documents []interface{}
 
-	for _, question := range questions {
+	for _, questionReceived := range questionsReceived {
 		document := bson.M{
-			"id":           question.ID(),
-			"organization": question.Organization(),
-			"model":        question.Model(),
-			"year":         question.Year(),
-			"discipline":   question.Discipline(),
-			"topic":        question.Topic(),
-			"question":     question.Question(),
-			"answer":       question.Answer(),
-			"options":      question.Options(),
+			"id":           questionReceived.ID(),
+			"organization": questionReceived.Organization(),
+			"model":        questionReceived.Model(),
+			"year":         questionReceived.Year(),
+			"discipline":   questionReceived.Discipline(),
+			"topic":        questionReceived.Topic(),
+			"question":     questionReceived.Question(),
+			"answer":       questionReceived.Answer(),
+			"options":      questionReceived.Options(),
 		}
 
 		documents = append(documents, document)
@@ -111,47 +111,53 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questions []mult
 	return nil
 }
 
-func (instance *QuestionMongodbRepository) ListQuestions() ([]multiplechoice.MultipleChoice, error) {
+func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Question, error) {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return nil, err
 	}
 
 	ctx := context.Background()
+	perPage := 3
 
-	cursor, err := conn.Collection("questions").Find(ctx, bson.M{})
+	findOptions := options.Find()
+
+	findOptions.SetLimit(int64(perPage))
+	findOptions.SetSkip(int64(perPage * (page - 1)))
+
+	cursor, err := conn.Collection("questions").Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	var questions []request.MultipleChoiceDTO
-	err = cursor.All(ctx, &questions)
+	var questionsDB []request.QuestionDTO
+	err = cursor.All(ctx, &questionsDB)
 	if err != nil {
 		return nil, err
 	}
 
-	var multipleChoicesDB []multiplechoice.MultipleChoice
+	var questionsFormatted []question.Question
 
-	for _, question := range questions {
-		baseReceived, err := base.NewBuilder().WithID(question.ID).WithOrganization(question.Organization).WithModel(question.Model).WithYear(question.Year).WithDiscipline(question.Discipline).WithTopic(question.Topic).Build()
+	for _, questionDB := range questionsDB {
+		baseFormatted, err := base.NewBuilder().WithID(questionDB.ID).WithOrganization(questionDB.Organization).WithModel(questionDB.Model).WithYear(questionDB.Year).WithDiscipline(questionDB.Discipline).WithTopic(questionDB.Topic).Build()
 		if err != nil {
 			return nil, err
 		}
 
-		multipleChoice, err := multiplechoice.NewBuilder().WithQuestion(question.Question).WithAnswer(question.Answer).WithOptions(question.Options).Build()
+		questionFormatted, err := question.NewBuilder().WithQuestion(questionDB.Question).WithAnswer(questionDB.Answer).WithOptions(questionDB.Options).Build()
 		if err != nil {
 			return nil, err
 		}
 
-		multipleChoice.Base = *baseReceived
+		questionFormatted.Base = *baseFormatted
 
-		multipleChoicesDB = append(multipleChoicesDB, *multipleChoice)
+		questionsFormatted = append(questionsFormatted, *questionFormatted)
 	}
 
-	return multipleChoicesDB, nil
+	return questionsFormatted, nil
 }
 
-func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter) ([]multiplechoice.MultipleChoice, error) {
+func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter) ([]question.Question, error) {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return nil, err
@@ -183,10 +189,10 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 	cursor, err := conn.Collection("questions").Find(ctx, filterQuery, findOptions)
 	if err != nil {
-		return []multiplechoice.MultipleChoice{}, err
+		return []question.Question{}, err
 	}
 
-	return formater(cursor, ctx)
+	return formatter(cursor, ctx)
 }
 
 func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {

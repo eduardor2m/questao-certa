@@ -1,24 +1,24 @@
-package multiplechoice
+package question
 
 import (
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 )
 
-type MultipleChoice struct {
+type Question struct {
 	base.Base
 	question string
 	options  []string
 	answer   string
 }
 
-func (instance *MultipleChoice) Question() string {
+func (instance *Question) Question() string {
 	return instance.question
 }
 
-func (instance *MultipleChoice) Options() []string {
+func (instance *Question) Options() []string {
 	return instance.options
 }
 
-func (instance *MultipleChoice) Answer() string {
+func (instance *Question) Answer() string {
 	return instance.answer
 }

@@ -3,11 +3,11 @@ package services
 import (
 	"encoding/csv"
 	"errors"
+	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"mime/multipart"
 	"strings"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/primary"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
@@ -20,28 +20,29 @@ type QuestionServices struct {
 	questionRepository repository.QuestionLoader
 }
 
-func (instance *QuestionServices) CreateQuestion(question multiplechoice.MultipleChoice) error {
+func (instance *QuestionServices) CreateQuestion(questionReceived question.Question) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
 	}
 
-	questionFormated, err := multiplechoice.NewBuilder().WithQuestion(question.Question()).WithAnswer(question.Answer()).WithOptions(question.Options()).Build()
+	questionFormatted, err := question.NewBuilder().WithQuestion(questionReceived.Question()).WithAnswer(questionReceived.Answer()).WithOptions(questionReceived.Options()).Build()
 	if err != nil {
 		return err
 	}
 
-	baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(question.Organization()).WithModel(question.Model()).WithYear(question.Year()).WithDiscipline(question.Discipline()).WithTopic(question.Topic()).Build()
+	baseFormatted, err := base.NewBuilder().WithID(id).WithOrganization(questionReceived.Organization()).WithModel(questionReceived.Model()).WithYear(questionReceived.Year()).WithDiscipline(questionReceived.Discipline()).WithTopic(questionReceived.Topic()).Build()
 	if err != nil {
 		return err
 	}
 
-	questionFormated.Base = *baseFormated
-	return instance.questionRepository.CreateQuestion(*questionFormated)
+	questionFormatted.Base = *baseFormatted
+
+	return instance.questionRepository.CreateQuestion(*questionFormatted)
 }
 
-func (instance *QuestionServices) ListQuestions() ([]multiplechoice.MultipleChoice, error) {
-	return instance.questionRepository.ListQuestions()
+func (instance *QuestionServices) ListQuestions(page int) ([]question.Question, error) {
+	return instance.questionRepository.ListQuestions(page)
 }
 
 func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) error {
@@ -62,19 +63,19 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 			return err
 		}
 
-		questionFormated, err := multiplechoice.NewBuilder().WithQuestion(record[5]).WithAnswer(record[6]).WithOptions(strings.Split(record[7], ";;")).Build()
+		questionFormatted, err := question.NewBuilder().WithQuestion(record[5]).WithAnswer(record[6]).WithOptions(strings.Split(record[7], ";;")).Build()
 		if err != nil {
 			return err
 		}
 
-		baseFormated, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithDiscipline(record[3]).WithTopic(record[4]).Build()
+		baseFormatted, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithDiscipline(record[3]).WithTopic(record[4]).Build()
 		if err != nil {
 			return err
 		}
 
-		questionFormated.Base = *baseFormated
+		questionFormatted.Base = *baseFormatted
 
-		err = instance.questionRepository.CreateQuestion(*questionFormated)
+		err = instance.questionRepository.CreateQuestion(*questionFormatted)
 
 		if err != nil {
 			return err
@@ -85,12 +86,12 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 	return nil
 }
 
-func (instance *QuestionServices) ListQuestionsByFilter(f filter.Filter) ([]multiplechoice.MultipleChoice, error) {
-	if f.Quantity() > 10 {
+func (instance *QuestionServices) ListQuestionsByFilter(filterReceived filter.Filter) ([]question.Question, error) {
+	if filterReceived.Quantity() > 10 {
 		return nil, errors.New("quantity must be less than 10")
 	}
 
-	return instance.questionRepository.ListQuestionsByFilter(f)
+	return instance.questionRepository.ListQuestionsByFilter(filterReceived)
 }
 
 func (instance *QuestionServices) DeleteQuestion(id string) error {

@@ -11,7 +11,7 @@ func loadQuestionRoutes(group *echo.Group) {
 
 	questionGroup.POST("", questionHandlers.CreateQuestion)
 	questionGroup.POST("/import", questionHandlers.ImportQuestionsByCSV)
-	questionGroup.GET("", questionHandlers.ListQuestions)
+	questionGroup.GET("/:page", questionHandlers.ListQuestions)
 	questionGroup.POST("/filter", questionHandlers.ListQuestionsByFilter)
 	questionGroup.DELETE("/:id", questionHandlers.DeleteQuestion)
 	questionGroup.DELETE("", questionHandlers.DeleteAllQuestions)

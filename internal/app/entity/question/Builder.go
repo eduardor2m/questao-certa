@@ -1,7 +1,7 @@
-package multiplechoice
+package question
 
 type Builder struct {
-	MultipleChoice
+	Question
 	Err error
 }
 
@@ -24,10 +24,10 @@ func (instance *Builder) WithAnswer(answer string) *Builder {
 	return instance
 }
 
-func (instance *Builder) Build() (*MultipleChoice, error) {
+func (instance *Builder) Build() (*Question, error) {
 	if instance.Err != nil {
 		return nil, instance.Err
 	}
 
-	return &instance.MultipleChoice, nil
+	return &instance.Question, nil
 }

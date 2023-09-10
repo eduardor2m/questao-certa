@@ -2,7 +2,7 @@ package request
 
 import "github.com/google/uuid"
 
-type MultipleChoiceDTO struct {
+type QuestionDTO struct {
 	ID           uuid.UUID `json:"id"`
 	Organization string    `json:"organization"`
 	Model        string    `json:"model"`

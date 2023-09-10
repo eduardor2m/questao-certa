@@ -4,14 +4,14 @@ import (
 	"mime/multipart"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
+	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 )
 
 type QuestionManager interface {
-	CreateQuestion(question multiplechoice.MultipleChoice) error
+	CreateQuestion(questionReceived question.Question) error
 	ImportQuestionsByCSV(multipart.File) error
-	ListQuestions() ([]multiplechoice.MultipleChoice, error)
-	ListQuestionsByFilter(filter filter.Filter) ([]multiplechoice.MultipleChoice, error)
+	ListQuestions(page int) ([]question.Question, error)
+	ListQuestionsByFilter(filterReceived filter.Filter) ([]question.Question, error)
 	DeleteQuestion(id string) error
 	DeleteAllQuestions() error
 }
