@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/response"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
@@ -8,8 +11,6 @@ import (
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/primary"
 	"github.com/labstack/echo/v4"
-	"net/http"
-	"strconv"
 )
 
 type QuestionHandler struct {
@@ -52,7 +53,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Question created successfully"})
+	return context.JSON(http.StatusCreated, response.InfoResponse{Message: "Question created successfully"})
 }
 
 // @Summary Importa questões de múltipla escolha
@@ -90,7 +91,7 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Success 200 {array} response.MultipleChoice
+// @Success 200 {array} response.Question
 // @Failure 400 {object} response.Error
 // @Router /question [get]
 func (instance QuestionHandler) ListQuestions(context echo.Context) error {
@@ -122,6 +123,10 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 		questionsDTO = append(questionsDTO, questionDTO)
 	}
 
+	if len(questionsDTO) == 0 {
+		return context.JSON(http.StatusOK, []response.Question{})
+	}
+
 	return context.JSON(http.StatusOK, questionsDTO)
 }
 
@@ -132,7 +137,7 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 // @Produce json
 // @Security bearerAuth
 // @Param organization path string true "Nome da organização"
-// @Success 200 {array} response.MultipleChoice
+// @Success 200 {array} response.Question
 // @Failure 400 {object} response.Error
 // @Router /question/{organization} [get]
 func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) error {
@@ -170,6 +175,10 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 		}
 
 		questionsDTO = append(questionsDTO, questionDTO)
+	}
+
+	if len(questionsDTO) == 0 {
+		return context.JSON(http.StatusOK, response.InfoResponse{Message: "No questions found"})
 	}
 
 	return context.JSON(http.StatusOK, questionsDTO)

@@ -20,7 +20,7 @@ func (instance *QuestionRepositoryMock) ImportQuestionsByCSV(questions []questio
 	return args.Error(0)
 }
 
-func (instance *QuestionRepositoryMock) ListQuestions() ([]question.Question, error) {
+func (instance *QuestionRepositoryMock) ListQuestions(page int) ([]question.Question, error) {
 	args := instance.Called()
 	return args.Get(0).([]question.Question), args.Error(1)
 }
