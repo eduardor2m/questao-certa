@@ -8,6 +8,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.8.12
 	go.mongodb.org/mongo-driver v1.12.1
+	go.uber.org/mock v0.2.0
 )
 
 require (

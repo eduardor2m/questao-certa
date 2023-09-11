@@ -38,10 +38,10 @@ func (instance *Builder) WithOrganization(organization string) *Builder {
 
 func (instance *Builder) WithModel(model string) *Builder {
 	if model == "multiple_choice" || model == "true_or_false" {
-		instance.Err = errors.New("Model is required and must be multiple_choice or true_or_false")
+		instance.model = model
 		return instance
 	}
-	instance.model = model
+	instance.Err = errors.New("Model is required and must be multiple_choice or true_or_false")
 	return instance
 }
 

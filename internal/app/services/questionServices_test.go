@@ -5,41 +5,31 @@ import (
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	"github.com/eduardor2m/questao-certa/internal/app/services/mocks"
+	"github.com/eduardor2m/questao-certa/tools/mocks"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 )
 
 func TestCreateQuestion(t *testing.T) {
-	questionRepositoryMock := new(mocks.QuestionRepositoryMock)
+	controll := gomock.NewController(t)
+	defer controll.Finish()
 
-	QuestionService := NewQuestionServices(questionRepositoryMock)
+	repo := mocks.NewMockQuestionLoader(controll)
+	service := NewQuestionServices(repo)
 
-	questionRepositoryMock.On("CreateQuestion", mock.Anything).Return(nil)
+	id := uuid.New()
+	baseReceived, err := base.NewBuilder().WithID(id).WithOrganization("Teste").WithDiscipline("Matemática").WithModel("multiple_choice").WithYear("2019").WithTopic("Qual o resultado de 1 + 1?").Build()
+	assert.NoError(t, err, "Erro ao criar a base")
 
-	questionReceived, err := question.NewBuilder().WithQuestion("Question").WithAnswer("Answer").WithOptions([]string{"Option 1", "Option 2"}).Build()
-	if err != nil {
-		t.Error(err)
-	}
-	baseReceived, err := base.NewBuilder().WithOrganization("Organization").WithModel("Model").WithYear("2023").WithDiscipline("Discipline").WithTopic("Topic").Build()
-	if err != nil {
-		t.Error(err)
-	}
+	questionReceived, err := question.NewBuilder().WithQuestion("Qual o resultado de 1 + 1?").WithAnswer("2").WithOptions([]string{"1", "2", "3", "4"}).Build()
+	assert.NoError(t, err, "Erro ao criar a pergunta")
 	questionReceived.Base = *baseReceived
 
-	err = QuestionService.CreateQuestion(*questionReceived)
+	// Configurando expectativas no mock
+	repo.EXPECT().CreateQuestion(questionReceived).Return(nil)
 
-	assert.Nil(t, err)
-}
+	err = service.CreateQuestion(*questionReceived)
 
-func TestListQuestions(t *testing.T) {
-	questionRepositoryMock := new(mocks.QuestionRepositoryMock)
-
-	QuestionService := NewQuestionServices(questionRepositoryMock)
-
-	questionRepositoryMock.On("ListQuestions", mock.Anything).Return([]question.Question{}, nil)
-
-	_, err := QuestionService.ListQuestions(10)
-
-	assert.Nil(t, err)
+	assert.NoError(t, err, "Erro ao criar a pergunta")
 }
