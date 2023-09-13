@@ -24,7 +24,7 @@ type QuestionHandler struct {
 // @Produce json
 // @Security bearerAuth
 // @Param question body request.QuestionDTO true "Dados da questão de múltipla escolha"
-// @Success 200 {object} response.InfoResponse "Questão criada com sucesso"
+// @Success 201 {object} response.InfoResponse "Questão criada com sucesso"
 // @Failure 400 {object} response.ErrorResponse "Erro ao criar questão"
 // @Router /question [post]
 func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
