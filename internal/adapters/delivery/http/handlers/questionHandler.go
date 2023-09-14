@@ -64,7 +64,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 // @Security bearerAuth
 // @Param file formData file true "Arquivo CSV com as questões de múltipla escolha"
 // @Success 200 {object} response.InfoResponse
-// @Failure 400 {object} response.Error
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question/import [post]
 func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error {
 	file, err := context.FormFile("file")
@@ -92,7 +92,7 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 // @Produce json
 // @Security bearerAuth
 // @Success 200 {array} response.Question
-// @Failure 400 {object} response.Error
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question [get]
 func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 	page := context.Param("page")
@@ -138,7 +138,7 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 // @Security bearerAuth
 // @Param organization path string true "Nome da organização"
 // @Success 200 {array} response.Question
-// @Failure 400 {object} response.Error
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question/{organization} [get]
 func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) error {
 	filterReceived := request.FilterDTO{}
@@ -191,8 +191,8 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "ID da questão"
-// @Success 200 {object} response.Info
-// @Failure 400 {object} response.Error
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question/{id} [delete]
 func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
 	id := context.Param("id")
@@ -211,8 +211,8 @@ func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Success 200 {object} response.Info
-// @Failure 400 {object} response.Error
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question [delete]
 func (instance QuestionHandler) DeleteAllQuestions(context echo.Context) error {
 	err := instance.service.DeleteAllQuestions()
