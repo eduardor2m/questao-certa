@@ -6,6 +6,7 @@ import (
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/middlewares"
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/routes"
+	"github.com/eduardor2m/questao-certa/tools/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -36,6 +37,10 @@ type api struct {
 // @name Authorization
 func NewAPI(options *Options) API {
 	echoInstance := echo.New()
+	echoInstance.HideBanner = true
+	// echoInstance.HidePort = true
+
+	logger.Info("Starting API")
 
 	return &api{
 		options:      options,
@@ -50,6 +55,7 @@ func (instance *api) Serve() {
 
 	instance.echoInstance.Use(instance.getCORSSettings())
 	instance.echoInstance.Logger.Fatal(instance.echoInstance.Start(":" + port))
+
 }
 
 func (instance *api) loadRoutes() {
