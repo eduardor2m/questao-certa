@@ -5,7 +5,7 @@ import (
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	"github.com/eduardor2m/questao-certa/tools/mocks"
+	"github.com/eduardor2m/questao-certa/internal/app/services/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"

@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"os"
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
@@ -69,7 +70,9 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 		"options":      questionReceived.Options(),
 	}
 
-	_, err = conn.Collection("questions").InsertOne(ctx, document)
+	collectionName := os.Getenv("DB_COLLECTION")
+
+	_, err = conn.Collection(collectionName).InsertOne(ctx, document)
 	if err != nil {
 		return err
 	}
@@ -102,8 +105,9 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 
 		documents = append(documents, document)
 	}
+	collectionName := os.Getenv("DB_COLLECTION")
 
-	_, err = conn.Collection("questions").InsertMany(ctx, documents)
+	_, err = conn.Collection(collectionName).InsertMany(ctx, documents)
 	if err != nil {
 		return err
 	}
@@ -125,7 +129,9 @@ func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Q
 	findOptions.SetLimit(int64(perPage))
 	findOptions.SetSkip(int64(perPage * (page - 1)))
 
-	cursor, err := conn.Collection("questions").Find(ctx, bson.M{}, findOptions)
+	collectionName := os.Getenv("DB_COLLECTION")
+
+	cursor, err := conn.Collection(collectionName).Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +193,9 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		filterQuery["discipline"] = f.Discipline()
 	}
 
-	cursor, err := conn.Collection("questions").Find(ctx, filterQuery, findOptions)
+	collectionName := os.Getenv("DB_COLLECTION")
+
+	cursor, err := conn.Collection(collectionName).Find(ctx, filterQuery, findOptions)
 	if err != nil {
 		return []question.Question{}, err
 	}
@@ -203,7 +211,9 @@ func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
 
 	ctx := context.Background()
 
-	_, err = conn.Collection("questions").DeleteOne(ctx, bson.M{"id": id})
+	collectionName := os.Getenv("DB_COLLECTION")
+
+	_, err = conn.Collection(collectionName).DeleteOne(ctx, bson.M{"id": id})
 	if err != nil {
 		return err
 	}
@@ -219,7 +229,9 @@ func (instance *QuestionMongodbRepository) DeleteAllQuestions() error {
 
 	ctx := context.Background()
 
-	_, err = conn.Collection("questions").DeleteMany(ctx, bson.M{})
+	collectionName := os.Getenv("DB_COLLECTION")
+
+	_, err = conn.Collection(collectionName).DeleteMany(ctx, bson.M{})
 	if err != nil {
 		return err
 	}

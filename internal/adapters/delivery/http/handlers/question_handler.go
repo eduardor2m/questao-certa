@@ -91,9 +91,10 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 // @Accept json
 // @Produce json
 // @Security bearerAuth
+// @Param page path int true "Número da página"
 // @Success 200 {array} response.Question
 // @Failure 400 {object} response.ErrorResponse
-// @Router /question [get]
+// @Router /question/{page} [get]
 func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 	page := context.Param("page")
 	pageInt, err := strconv.Atoi(page)
@@ -130,16 +131,16 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 	return context.JSON(http.StatusOK, questionsDTO)
 }
 
-// @Summary Lista todas as questões de uma organização
-// @Description Lista todas as questões de uma organização
+// @Summary Lista questões por filtro
+// @Description Lista questões por filtro
 // @Tags Question
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Param organization path string true "Nome da organização"
+// @Param filter body request.FilterDTO true "Filtro para busca de questões"
 // @Success 200 {array} response.Question
 // @Failure 400 {object} response.ErrorResponse
-// @Router /question/{organization} [get]
+// @Router /question/filter [post]
 func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) error {
 	filterReceived := request.FilterDTO{}
 

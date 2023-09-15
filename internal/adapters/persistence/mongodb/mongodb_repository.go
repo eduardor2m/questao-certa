@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,14 +20,21 @@ var _ connectorManager = (*DatabaseConnectorManager)(nil)
 type DatabaseConnectorManager struct{}
 
 func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
+	dbName := os.Getenv("DB_NAME")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://root:root@localhost:27017"))
+	// client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://root:root@localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+dbUser+":"+dbPassword+"@"+dbHost+":"+dbPort))
 	if err != nil {
 		return nil, err
 	}
 
-	collection := client.Database("questao-certa")
+	collection := client.Database(dbName)
 
 	if err != nil {
 		log.Fatal(err)
