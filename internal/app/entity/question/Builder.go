@@ -1,6 +1,10 @@
 package question
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/eduardor2m/questao-certa/internal/app/utils/validator"
+)
 
 type Builder struct {
 	Question
@@ -21,19 +25,25 @@ func (instance *Builder) WithQuestion(question string) *Builder {
 }
 
 func (instance *Builder) WithOptions(options []string) *Builder {
-	if len(options) == 0 {
-		instance.Err = errors.New("Options is required")
+	valid, err := validator.IsOptionsValid(options)
+
+	if !valid {
+		instance.Err = err
 		return instance
 	}
+
 	instance.options = options
 	return instance
 }
 
 func (instance *Builder) WithAnswer(answer string) *Builder {
-	if answer == "" {
-		instance.Err = errors.New("Answer is required")
+	valid, err := validator.IsAnswerValid(answer)
+
+	if !valid {
+		instance.Err = err
 		return instance
 	}
+
 	instance.answer = answer
 	return instance
 }

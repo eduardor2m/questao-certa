@@ -3,9 +3,11 @@ package services
 import (
 	"encoding/csv"
 	"errors"
-	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
+	"fmt"
 	"mime/multipart"
 	"strings"
+
+	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
@@ -57,6 +59,8 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 	records = records[1:]
 
 	for _, record := range records {
+
+		fmt.Println(record)
 
 		id, err := uuid.NewUUID()
 		if err != nil {

@@ -2,8 +2,8 @@ package base
 
 import (
 	"errors"
-	"regexp"
 
+	"github.com/eduardor2m/questao-certa/internal/app/utils/validator"
 	"github.com/google/uuid"
 )
 
@@ -37,23 +37,21 @@ func (instance *Builder) WithOrganization(organization string) *Builder {
 }
 
 func (instance *Builder) WithModel(model string) *Builder {
-	if model == "multiple_choice" || model == "true_or_false" {
-		instance.model = model
-		return instance
+	valid, err := validator.IsModelValid(model)
+
+	if !valid {
+		instance.Err = err
 	}
-	instance.Err = errors.New("Model is required and must be multiple_choice or true_or_false")
+
+	instance.model = model
 	return instance
 }
 
 func (instance *Builder) WithYear(year string) *Builder {
-	if year == "" {
-		instance.Err = errors.New("Year is required")
-		return instance
-	}
+	valid, err := validator.IsYearValid(year)
 
-	regexp := regexp.MustCompile(`^[0-9]{4}$`)
-	if !regexp.MatchString(year) {
-		instance.Err = errors.New("Year must be a valid year")
+	if !valid {
+		instance.Err = err
 		return instance
 	}
 
