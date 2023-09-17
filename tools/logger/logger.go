@@ -53,6 +53,13 @@ func Warn(message string, tags ...zap.Field) {
 	log.Sync()
 }
 
+// Função fatal para mostrar log de erros fatais da aplicação
+func Fatal(message string, err error, tags ...zap.Field) {
+	tags = append(tags, zap.NamedError("error", err))
+	log.Fatal(message, tags...)
+	log.Sync()
+}
+
 // Função que retorna o tipo de saída do log
 func getOutputLogs() string {
 	output := strings.ToLower(strings.TrimSpace(LOG_OUTPUT))
