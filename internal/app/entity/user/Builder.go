@@ -1,6 +1,9 @@
 package user
 
-import "github.com/google/uuid"
+import (
+	"github.com/eduardor2m/questao-certa/internal/app/utils/validator"
+	"github.com/google/uuid"
+)
 
 type Builder struct {
 	User
@@ -22,11 +25,35 @@ func (instance *Builder) WithName(name string) *Builder {
 }
 
 func (instance *Builder) WithEmail(email string) *Builder {
+	valid, err := validator.IsEmailValid(email)
+
+	if err != nil {
+		instance.Err = err
+		return instance
+	}
+
+	if !valid {
+		instance.Err = err
+		return instance
+	}
+
 	instance.email = email
 	return instance
 }
 
 func (instance *Builder) WithPassword(password string) *Builder {
+	valid, err := validator.IsPasswordValid(password)
+
+	if err != nil {
+		instance.Err = err
+		return instance
+	}
+
+	if !valid {
+		instance.Err = err
+		return instance
+	}
+
 	instance.password = password
 	return instance
 }
