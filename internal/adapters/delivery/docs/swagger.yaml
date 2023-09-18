@@ -3,14 +3,19 @@ definitions:
   request.FilterDTO:
     properties:
       discipline:
+        example: ENGENHARIA DE PRODUÇÃO
         type: string
       organization:
+        example: CESGRANRIO
         type: string
       quantity:
+        example: 10
         type: integer
       topic:
+        example: ADMINISTRAÇÃO DA PRODUÇÃO
         type: string
       year:
+        example: "2019"
         type: string
     type: object
   request.QuestionDTO:
@@ -47,6 +52,15 @@ definitions:
         type: string
       year:
         example: "2019"
+        type: string
+    type: object
+  request.UserDTO:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
         type: string
     type: object
   response.ErrorResponse:
@@ -86,8 +100,8 @@ info:
   contact:
     email: deveduardomelo@gmail.com
     name: Eduardo Melo
-  description: Reserva de quartos para Hotéis
-  title: Reservify API
+  description: API para gerenciamento de questões e respostas
+  title: Questão Certa API
   version: "1.0"
 paths:
   /question:
@@ -252,6 +266,58 @@ paths:
       summary: Importa questões de múltipla escolha
       tags:
       - Question
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Cria um usuário
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Erro ao criar usuário
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Cria um usuário
+      tags:
+      - User
+  /user/signin:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Autentica um usuário
+      tags:
+      - User
 securityDefinitions:
   bearerAuth:
     in: header

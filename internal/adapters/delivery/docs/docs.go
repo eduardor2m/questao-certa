@@ -275,6 +275,86 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user": {
+            "post": {
+                "description": "Cria um usuário",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Cria um usuário",
+                "parameters": [
+                    {
+                        "description": "Dados do usuário",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso",
+                        "schema": {
+                            "$ref": "#/definitions/response.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Erro ao criar usuário",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/signin": {
+            "post": {
+                "description": "Autentica um usuário",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Autentica um usuário",
+                "parameters": [
+                    {
+                        "description": "Dados do usuário",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -282,19 +362,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "discipline": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ENGENHARIA DE PRODUÇÃO"
                 },
                 "organization": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "CESGRANRIO"
                 },
                 "quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 10
                 },
                 "topic": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "ADMINISTRAÇÃO DA PRODUÇÃO"
                 },
                 "year": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2019"
                 }
             }
         },
@@ -344,6 +429,20 @@ const docTemplate = `{
                 "year": {
                     "type": "string",
                     "example": "2019"
+                }
+            }
+        },
+        "request.UserDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
@@ -414,8 +513,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Reservify API",
-	Description:      "Reserva de quartos para Hotéis",
+	Title:            "Questão Certa API",
+	Description:      "API para gerenciamento de questões e respostas",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

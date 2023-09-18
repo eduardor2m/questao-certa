@@ -8,3 +8,7 @@ import (
 func GetQuestionServices() primary.QuestionManager {
 	return services.NewQuestionServices(GetQuestionRepository())
 }
+
+func GetUserServices() primary.UserManager {
+	return services.NewUserServices(GetUserRepository())
+}

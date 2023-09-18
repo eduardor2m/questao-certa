@@ -5,3 +5,7 @@ import "github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/hand
 func GetQuestionHandler() *handlers.QuestionHandler {
 	return handlers.NewQuestionHandler(GetQuestionServices())
 }
+
+func GetUserHandler() *handlers.UserHandler {
+	return handlers.NewUserHandler(GetUserServices())
+}

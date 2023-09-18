@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/csv"
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"strings"
 
@@ -58,9 +57,9 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 
 	records = records[1:]
 
-	for _, record := range records {
+	var allQuestions []question.Question
 
-		fmt.Println(record)
+	for _, record := range records {
 
 		id, err := uuid.NewUUID()
 		if err != nil {
@@ -79,15 +78,10 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 
 		questionFormatted.Base = *baseFormatted
 
-		err = instance.questionRepository.CreateQuestion(*questionFormatted)
-
-		if err != nil {
-			return err
-		}
-
+		allQuestions = append(allQuestions, *questionFormatted)
 	}
 
-	return nil
+	return instance.questionRepository.ImportQuestionsByCSV(allQuestions)
 }
 
 func (instance *QuestionServices) ListQuestionsByFilter(filterReceived filter.Filter) ([]question.Question, error) {
