@@ -11,4 +11,5 @@ func loadUserRoutes(group *echo.Group) {
 
 	userGroup.POST("", userHandlers.SignUp)
 	userGroup.POST("/signin", userHandlers.SignIn)
+	userGroup.GET("/verify", userHandlers.VerifyUserIsLoggedOrAdmin)
 }

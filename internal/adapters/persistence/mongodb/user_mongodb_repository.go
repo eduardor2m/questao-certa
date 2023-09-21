@@ -10,6 +10,7 @@ import (
 	"github.com/eduardor2m/questao-certa/internal/app/entity/user"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,6 +44,7 @@ func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 		"name":     userReceived.Name(),
 		"email":    userReceived.Email(),
 		"password": userReceived.Password(),
+		"admin":    false,
 	})
 
 	if err != nil {
@@ -60,17 +62,45 @@ func (instance *UserMongodbRepository) SignIn(email string, password string) (*s
 
 	ctx := context.Background()
 
-	var user request.UserDTO
-
-	err = conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
+	userRow, err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
 		"email": email,
-	}).Decode(&user)
+	}).DecodeBytes()
 
 	if err != nil {
 		return nil, err
 	}
 
-	userPassword := user.Password
+	//Call of bsoncore.Value.StringValue on binary type
+
+	//Call of bsoncore.Value.StringValue on binary type
+
+	subtipy, data := userRow.Lookup("id").Binary()
+
+	if subtipy != 0 {
+		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+	}
+
+	userDBId, err := uuid.FromBytes(data)
+
+	fmt.Println(userDBId)
+
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+	}
+
+	userDB, err := user.NewBuilder().WithID(userDBId).WithName(userRow.Lookup("name").StringValue()).WithPassword(userRow.Lookup("password").StringValue()).WithEmail(userRow.Lookup("email").StringValue()).Build()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(userDB)
+
+	userPassword := userDB.Password()
+
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(password))
 
@@ -83,7 +113,9 @@ func (instance *UserMongodbRepository) SignIn(email string, password string) (*s
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = userDB.ID()
 	claims["authorized"] = true
+
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtSecretKey))
@@ -93,6 +125,76 @@ func (instance *UserMongodbRepository) SignIn(email string, password string) (*s
 	}
 
 	return &tokenString, nil
+}
+
+func (instance *UserMongodbRepository) VerifyUserIsLoggedOrAdmin(tokenReceived string) (*string, error) {
+	conn, err := instance.connectorManager.getConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+
+	jwtSecretKey := os.Getenv("JWT_SECRET")
+
+	token, err := jwt.Parse(tokenReceived, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecretKey), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("falha ao verificar token: %v", err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userIdFromToken := claims["user_id"]
+		userAuthorizedFromToken := claims["authorized"].(bool)
+		userIdFromTokenUUID, err := uuid.Parse(userIdFromToken.(string))
+
+		if err != nil {
+			return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+		}
+
+		if userAuthorizedFromToken {
+			userRow, err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
+				"id": userIdFromTokenUUID,
+			}).DecodeBytes()
+
+			if err != nil {
+				return nil, fmt.Errorf("falha ao buscar usuário: %v", err)
+			}
+
+			_, data := userRow.Lookup("id").Binary()
+
+			userDBId, err := uuid.FromBytes(data)
+
+			if err != nil {
+				return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+			}
+
+			userDB, err := user.NewBuilder().WithID(userDBId).WithName(userRow.Lookup("name").StringValue()).WithPassword(userRow.Lookup("password").StringValue()).WithEmail(userRow.Lookup("email").StringValue()).WithAdmin(userRow.Lookup("admin").Boolean()).Build()
+
+			if err != nil {
+				return nil, err
+			}
+
+			fmt.Println(userDB)
+
+			if userDB.Admin() {
+				userAdmin := "admin"
+				return &userAdmin, nil
+			} else {
+				userLogged := "logged"
+				return &userLogged, nil
+			}
+		}
+
+	} else {
+		return nil, fmt.Errorf("token inválido")
+	}
+
+	userNotLogged := "not logged"
+
+	return &userNotLogged, nil
 }
 
 func NewUserMongodbRepository(connectorManager connectorManager) *UserMongodbRepository {

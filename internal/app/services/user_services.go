@@ -40,6 +40,10 @@ func (instance *UserServices) SignIn(email string, password string) (*string, er
 	return instance.userRepository.SignIn(email, password)
 }
 
+func (instance *UserServices) VerifyUserIsLoggedOrAdmin(token string) (*string, error) {
+	return instance.userRepository.VerifyUserIsLoggedOrAdmin(token)
+}
+
 func NewUserServices(userRepository repository.UserLoader) *UserServices {
 	return &UserServices{userRepository: userRepository}
 }

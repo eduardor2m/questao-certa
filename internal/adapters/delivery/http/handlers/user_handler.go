@@ -76,6 +76,33 @@ func (instance UserHandler) SignIn(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User logged successfully"})
 }
 
+// @Summary Verifica se o usuário está logado ou é admin
+// @Description Verifica se o usuário está logado ou é admin
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param token header string true "Token de autenticação"
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Router /user/verify [get]
+func (instance UserHandler) VerifyUserIsLoggedOrAdmin(context echo.Context) error {
+	token := context.Request().Header.Get("Authorization")
+
+	if token == "" {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: "Token not found"})
+	}
+
+	tokenFormatted := token[7:]
+
+	message, err := instance.service.VerifyUserIsLoggedOrAdmin(tokenFormatted)
+
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: *message})
+}
+
 func NewUserHandler(service primary.UserManager) *UserHandler {
 	return &UserHandler{service: service}
 }

@@ -20,22 +20,34 @@ var _ connectorManager = (*DatabaseConnectorManager)(nil)
 type DatabaseConnectorManager struct{}
 
 func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
-	dbName := os.Getenv("DB_NAME")
-	dbAtlasPassword := os.Getenv("DB_ATLAS_PASSWORD")
-	// dbPassword := os.Getenv("DB_PASSWORD")
-	// dbUser := os.Getenv("DB_USER")
-	// dbHost := os.Getenv("DB_HOST")
-	// dbPort := os.Getenv("DB_PORT")
+	var (
+		mongodbAtlasPassword = os.Getenv("MONGODB_ATLAS_PASSWORD")
+		mongodbName          = os.Getenv("MONGODB_NAME")
+		mongodbPassword      = os.Getenv("MONGODB_PASSWORD")
+		mongodbUser          = os.Getenv("MONGODB_USER")
+		mongodbHost          = os.Getenv("MONGODB_HOST")
+		mongodbPort          = os.Getenv("MONGODB_PORT")
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	// client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+dbUser+":"+dbPassword+"@"+dbHost+":"+dbPort))
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://eduardor2m:"+dbAtlasPassword+"@questao-certa.fvgdayd.mongodb.net/?retryWrites=true&w=majority"))
-	if err != nil {
-		return nil, err
+
+	dev := os.Getenv("DEVELOPMENT")
+	var client *mongo.Client
+	var err error
+	if dev == "true" {
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+mongodbUser+":"+mongodbPassword+"@"+mongodbHost+":"+mongodbPort))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://eduardor2m:"+mongodbAtlasPassword+"@questao-certa.fvgdayd.mongodb.net/?retryWrites=true&w=majority"))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	collection := client.Database(dbName)
+	collection := client.Database(mongodbName)
 
 	if err != nil {
 		log.Fatal(err)
