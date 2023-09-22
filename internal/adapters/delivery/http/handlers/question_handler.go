@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
 	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/response"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	multiplechoice "github.com/eduardor2m/questao-certa/internal/app/entity/question"
+	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/primary"
 	"github.com/labstack/echo/v4"
@@ -22,25 +23,25 @@ type QuestionHandler struct {
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Param question body request.MultipleChoiceDTO true "Dados da questão de múltipla escolha"
-// @Success 200 {object} response.InfoResponse "Questão criada com sucesso"
+// @Param question body request.QuestionDTO true "Dados da questão de múltipla escolha"
+// @Success 201 {object} response.InfoResponse "Questão criada com sucesso"
 // @Failure 400 {object} response.ErrorResponse "Erro ao criar questão"
 // @Router /question [post]
 func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
-	var multipleChoiceDTO request.MultipleChoiceDTO
+	var questionDTO request.QuestionDTO
 
-	err := context.Bind(&multipleChoiceDTO)
+	err := context.Bind(&questionDTO)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	baseReceived, err := base.NewBuilder().WithOrganization(multipleChoiceDTO.Organization).WithModel(multipleChoiceDTO.Model).WithYear(multipleChoiceDTO.Year).WithDiscipline(multipleChoiceDTO.Discipline).WithTopic(multipleChoiceDTO.Topic).Build()
+	baseReceived, err := base.NewBuilder().WithOrganization(questionDTO.Organization).WithModel(questionDTO.Model).WithYear(questionDTO.Year).WithDiscipline(questionDTO.Discipline).WithTopic(questionDTO.Topic).Build()
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	multipleChoiceReceived, err := multiplechoice.NewBuilder().WithQuestion(multipleChoiceDTO.Question).WithOptions(multipleChoiceDTO.Options).WithAnswer(multipleChoiceDTO.Answer).Build()
+	multipleChoiceReceived, err := question.NewBuilder().WithQuestion(questionDTO.Question).WithOptions(questionDTO.Options).WithAnswer(questionDTO.Answer).Build()
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -52,7 +53,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	return context.JSON(http.StatusOK, response.InfoResponse{Message: "Question created successfully"})
+	return context.JSON(http.StatusCreated, response.InfoResponse{Message: "Question created successfully"})
 }
 
 // @Summary Importa questões de múltipla escolha
@@ -63,7 +64,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 // @Security bearerAuth
 // @Param file formData file true "Arquivo CSV com as questões de múltipla escolha"
 // @Success 200 {object} response.InfoResponse
-// @Failure 400 {object} response.Error
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question/import [post]
 func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error {
 	file, err := context.FormFile("file")
@@ -90,46 +91,56 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Success 200 {array} response.MultipleChoice
-// @Failure 400 {object} response.Error
-// @Router /question [get]
+// @Param page path int true "Número da página"
+// @Success 200 {array} response.Question
+// @Failure 400 {object} response.ErrorResponse
+// @Router /question/{page} [get]
 func (instance QuestionHandler) ListQuestions(context echo.Context) error {
-	questions, err := instance.service.ListQuestions()
+	page := context.Param("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+	questionsReceivedDB, err := instance.service.ListQuestions(pageInt)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	var questionsDTO []response.MultipleChoice
+	var questionsDTO []response.Question
 
-	for _, question := range questions {
-		questionDTO := response.MultipleChoice{
-			ID:           question.ID(),
-			Organization: question.Organization(),
-			Model:        question.Model(),
-			Year:         question.Year(),
-			Discipline:   question.Discipline(),
-			Topic:        question.Topic(),
-			Question:     question.Question(),
-			Options:      question.Options(),
-			Answer:       question.Answer(),
+	for _, questionReceivedDB := range questionsReceivedDB {
+		questionDTO := response.Question{
+			ID:           questionReceivedDB.ID(),
+			Organization: questionReceivedDB.Organization(),
+			Model:        questionReceivedDB.Model(),
+			Year:         questionReceivedDB.Year(),
+			Discipline:   questionReceivedDB.Discipline(),
+			Topic:        questionReceivedDB.Topic(),
+			Question:     questionReceivedDB.Question(),
+			Options:      questionReceivedDB.Options(),
+			Answer:       questionReceivedDB.Answer(),
 		}
 
 		questionsDTO = append(questionsDTO, questionDTO)
 	}
 
+	if len(questionsDTO) == 0 {
+		return context.JSON(http.StatusOK, []response.Question{})
+	}
+
 	return context.JSON(http.StatusOK, questionsDTO)
 }
 
-// @Summary Lista todas as questões de uma organização
-// @Description Lista todas as questões de uma organização
+// @Summary Lista questões por filtro
+// @Description Lista questões por filtro
 // @Tags Question
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Param organization path string true "Nome da organização"
-// @Success 200 {array} response.MultipleChoice
-// @Failure 400 {object} response.Error
-// @Router /question/{organization} [get]
+// @Param filter body request.FilterDTO true "Filtro para busca de questões"
+// @Success 200 {array} response.Question
+// @Failure 400 {object} response.ErrorResponse
+// @Router /question/filter [post]
 func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) error {
 	filterReceived := request.FilterDTO{}
 
@@ -138,33 +149,37 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	filterFormated, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithDiscipline(filterReceived.Discipline).WithTopic(filterReceived.Topic).WithQuantity(filterReceived.Quantity).Build()
+	filterFormatted, err := filter.NewBuilder().WithOrganization(filterReceived.Organization).WithYear(filterReceived.Year).WithDiscipline(filterReceived.Discipline).WithTopic(filterReceived.Topic).WithQuantity(filterReceived.Quantity).Build()
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	questions, err := instance.service.ListQuestionsByFilter(*filterFormated)
+	questionsReceivedDB, err := instance.service.ListQuestionsByFilter(*filterFormatted)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	var questionsDTO []response.MultipleChoice
+	var questionsDTO []response.Question
 
-	for _, question := range questions {
-		questionDTO := response.MultipleChoice{
-			ID:           question.ID(),
-			Organization: question.Organization(),
-			Model:        question.Model(),
-			Year:         question.Year(),
-			Discipline:   question.Discipline(),
-			Topic:        question.Topic(),
-			Question:     question.Question(),
-			Options:      question.Options(),
-			Answer:       question.Answer(),
+	for _, questionReceivedDB := range questionsReceivedDB {
+		questionDTO := response.Question{
+			ID:           questionReceivedDB.ID(),
+			Organization: questionReceivedDB.Organization(),
+			Model:        questionReceivedDB.Model(),
+			Year:         questionReceivedDB.Year(),
+			Discipline:   questionReceivedDB.Discipline(),
+			Topic:        questionReceivedDB.Topic(),
+			Question:     questionReceivedDB.Question(),
+			Options:      questionReceivedDB.Options(),
+			Answer:       questionReceivedDB.Answer(),
 		}
 
 		questionsDTO = append(questionsDTO, questionDTO)
+	}
+
+	if len(questionsDTO) == 0 {
+		return context.JSON(http.StatusOK, response.InfoResponse{Message: "No questions found"})
 	}
 
 	return context.JSON(http.StatusOK, questionsDTO)
@@ -177,8 +192,8 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "ID da questão"
-// @Success 200 {object} response.Info
-// @Failure 400 {object} response.Error
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question/{id} [delete]
 func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
 	id := context.Param("id")
@@ -197,8 +212,8 @@ func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
 // @Accept json
 // @Produce json
 // @Security bearerAuth
-// @Success 200 {object} response.Info
-// @Failure 400 {object} response.Error
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
 // @Router /question [delete]
 func (instance QuestionHandler) DeleteAllQuestions(context echo.Context) error {
 	err := instance.service.DeleteAllQuestions()

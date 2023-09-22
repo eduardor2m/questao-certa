@@ -2,7 +2,7 @@ package response
 
 import "github.com/google/uuid"
 
-type MultipleChoice struct {
+type Question struct {
 	ID           uuid.UUID `json:"id"`
 	Organization string    `json:"organization"`
 	Model        string    `json:"model"`

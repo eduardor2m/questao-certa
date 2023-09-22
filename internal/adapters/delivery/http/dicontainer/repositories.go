@@ -9,6 +9,10 @@ func GetQuestionRepository() repository.QuestionLoader {
 	return mongodb.NewQuestionMongodbRepository(GetPsqlConnectionManager())
 }
 
+func GetUserRepository() repository.UserLoader {
+	return mongodb.NewUserMongodbRepository(GetPsqlConnectionManager())
+}
+
 func GetPsqlConnectionManager() *mongodb.DatabaseConnectorManager {
 	return &mongodb.DatabaseConnectorManager{}
 }
