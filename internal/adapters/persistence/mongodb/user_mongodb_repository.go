@@ -177,14 +177,14 @@ func (instance *UserMongodbRepository) VerifyUserIsLoggedOrAdmin(tokenReceived s
 				return nil, err
 			}
 
-			fmt.Println(userDB)
+			var userType string
 
 			if userDB.Admin() {
-				userAdmin := "admin"
-				return &userAdmin, nil
+				userType = "admin"
+				return &userType, nil
 			} else {
-				userLogged := "logged"
-				return &userLogged, nil
+				userType = "user"
+				return &userType, nil
 			}
 		}
 

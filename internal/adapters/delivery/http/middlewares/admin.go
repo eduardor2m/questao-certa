@@ -8,13 +8,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GuardMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
 		urlsNotNeedAuthorization := []string{
 			"/api/user/signin",
 			"/api/user",
-			"/api/docs/",
-			"/api/question/filter",
 		}
 
 		currentURL := context.Request().URL.Path
@@ -42,11 +40,17 @@ func GuardMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userServices := dicontainer.GetUserServices()
 
-		_, err := userServices.VerifyUserIsLoggedOrAdmin(authHeader[7:])
+		userType, err := userServices.VerifyUserIsLoggedOrAdmin(authHeader[7:])
 
 		if err != nil {
 			return context.JSON(401, map[string]string{
 				"message": "user not found",
+			})
+		}
+
+		if *userType != "admin" {
+			return context.JSON(401, map[string]string{
+				"message": "user not admin, user type is: " + *userType,
 			})
 		}
 
