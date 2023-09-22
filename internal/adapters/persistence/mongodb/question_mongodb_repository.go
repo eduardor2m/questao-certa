@@ -70,7 +70,7 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 		"options":      questionReceived.Options(),
 	}
 
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	_, err = conn.Collection(collectionName).InsertOne(ctx, document)
 	if err != nil {
@@ -105,7 +105,7 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 
 		documents = append(documents, document)
 	}
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	_, err = conn.Collection(collectionName).InsertMany(ctx, documents)
 	if err != nil {
@@ -129,7 +129,7 @@ func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Q
 	findOptions.SetLimit(int64(perPage))
 	findOptions.SetSkip(int64(perPage * (page - 1)))
 
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	cursor, err := conn.Collection(collectionName).Find(ctx, bson.M{}, findOptions)
 	if err != nil {
@@ -193,7 +193,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		filterQuery["discipline"] = f.Discipline()
 	}
 
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	cursor, err := conn.Collection(collectionName).Find(ctx, filterQuery, findOptions)
 	if err != nil {
@@ -211,7 +211,7 @@ func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
 
 	ctx := context.Background()
 
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	_, err = conn.Collection(collectionName).DeleteOne(ctx, bson.M{"id": id})
 	if err != nil {
@@ -229,7 +229,7 @@ func (instance *QuestionMongodbRepository) DeleteAllQuestions() error {
 
 	ctx := context.Background()
 
-	collectionName := os.Getenv("DB_COLLECTION")
+	collectionName := os.Getenv("MONGODB_COLLECTION")
 
 	_, err = conn.Collection(collectionName).DeleteMany(ctx, bson.M{})
 	if err != nil {

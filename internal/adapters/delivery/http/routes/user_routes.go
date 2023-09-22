@@ -7,10 +7,11 @@ import (
 )
 
 func loadUserRoutes(group *echo.Group) {
-	userGroup := group.Group("/user", middlewares.Admin)
+	userGroup := group.Group("/user") // middlewares.Admin,
+
 	userHandlers := dicontainer.GetUserHandler()
 
 	userGroup.POST("", userHandlers.SignUp)
 	userGroup.POST("/signin", userHandlers.SignIn)
-	userGroup.GET("/verify", userHandlers.VerifyUserIsLoggedOrAdmin)
+	userGroup.GET("/verify", middlewares.Admin(userHandlers.VerifyUserIsLoggedOrAdmin))
 }

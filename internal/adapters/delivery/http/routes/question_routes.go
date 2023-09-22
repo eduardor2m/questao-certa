@@ -11,9 +11,9 @@ func loadQuestionRoutes(group *echo.Group) {
 	questionHandlers := dicontainer.GetQuestionHandler()
 
 	questionGroup.POST("", middlewares.Admin(questionHandlers.CreateQuestion))
-	questionGroup.POST("/import", questionHandlers.ImportQuestionsByCSV)
-	questionGroup.GET("/:page", questionHandlers.ListQuestions)
+	questionGroup.POST("/import", middlewares.Admin(questionHandlers.ImportQuestionsByCSV))
+	questionGroup.GET("/:page", middlewares.Admin(questionHandlers.ListQuestions))
 	questionGroup.POST("/filter", questionHandlers.ListQuestionsByFilter)
-	questionGroup.DELETE("/:id", questionHandlers.DeleteQuestion)
-	questionGroup.DELETE("", questionHandlers.DeleteAllQuestions)
+	questionGroup.DELETE("/:id", middlewares.Admin(questionHandlers.DeleteQuestion))
+	questionGroup.DELETE("", middlewares.Admin(questionHandlers.DeleteAllQuestions))
 }

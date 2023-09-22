@@ -13,7 +13,7 @@ func GuardMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		urlsNotNeedAuthorization := []string{
 			"/api/user/signin",
 			"/api/user",
-			"/api/docs/",
+			"/api/docs/*",
 			"/api/question/filter",
 		}
 

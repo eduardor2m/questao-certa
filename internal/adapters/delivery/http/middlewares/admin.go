@@ -11,8 +11,8 @@ import (
 func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
 		urlsNotNeedAuthorization := []string{
-			"/api/user/signin",
-			"/api/user",
+			// "/api/user/signin",
+			// "/api/user",
 		}
 
 		currentURL := context.Request().URL.Path
