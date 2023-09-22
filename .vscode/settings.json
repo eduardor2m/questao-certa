@@ -1,0 +1,13 @@
+{
+  "workbench.tree.indent": 16,
+  "material-icon-theme.folders.associations": {
+    "internal": "rules",
+    "adapters": "core",
+    "entity": "class",
+    "repository": "mappings",
+    "primary": "project",
+    "delivery": "dist",
+    "persistence": "upload",
+    "mongodb": "database",
+  },
+}
