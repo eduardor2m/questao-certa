@@ -46,7 +46,7 @@ func GuardMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		if err != nil {
 			return context.JSON(401, map[string]string{
-				"message": "user not found",
+				"message": "user not found: " + err.Error(),
 			})
 		}
 

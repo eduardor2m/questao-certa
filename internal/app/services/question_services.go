@@ -5,6 +5,7 @@ import (
 	"errors"
 	"mime/multipart"
 	"strings"
+	"sync"
 
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 
@@ -58,28 +59,37 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 	records = records[1:]
 
 	var allQuestions []question.Question
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	for _, record := range records {
+		wg.Add(1)
+		go func(record []string) {
+			defer wg.Done()
 
-		id, err := uuid.NewUUID()
-		if err != nil {
-			return err
-		}
+			id, err := uuid.NewUUID()
+			if err != nil {
+				return
+			}
 
-		questionFormatted, err := question.NewBuilder().WithQuestion(record[5]).WithAnswer(record[6]).WithOptions(strings.Split(record[7], ";;")).Build()
-		if err != nil {
-			return err
-		}
+			questionFormatted, err := question.NewBuilder().WithQuestion(record[5]).WithAnswer(record[6]).WithOptions(strings.Split(record[7], ";;")).Build()
+			if err != nil {
+				return
+			}
 
-		baseFormatted, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithDiscipline(record[3]).WithTopic(record[4]).Build()
-		if err != nil {
-			return err
-		}
+			baseFormatted, err := base.NewBuilder().WithID(id).WithOrganization(record[0]).WithModel(record[1]).WithYear(record[2]).WithDiscipline(record[3]).WithTopic(record[4]).Build()
+			if err != nil {
+				return
+			}
 
-		questionFormatted.Base = *baseFormatted
-
-		allQuestions = append(allQuestions, *questionFormatted)
+			questionFormatted.Base = *baseFormatted
+			mu.Lock()
+			allQuestions = append(allQuestions, *questionFormatted)
+			mu.Unlock()
+		}(record)
 	}
+
+	wg.Wait()
 
 	return instance.questionRepository.ImportQuestionsByCSV(allQuestions)
 }

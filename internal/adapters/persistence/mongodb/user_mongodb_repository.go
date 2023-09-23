@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
+	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/token"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/user"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
 	"github.com/golang-jwt/jwt"
@@ -21,21 +21,34 @@ type UserMongodbRepository struct {
 	connectorManager
 }
 
+type UserDB struct {
+	ID       uuid.UUID `bson:"id"`
+	Name     string    `bson:"name"`
+	Email    string    `bson:"email"`
+	Password string    `bson:"password"`
+	Admin    bool      `bson:"admin"`
+}
+
 func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
 	}
 
+	defer instance.closeConnection(conn)
+
 	ctx := context.Background()
 
-	var userDTO request.UserDTO
+	var userDB *UserDB
 
 	err = conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
 		"email": userReceived.Email(),
-	}).Decode(&userDTO)
+	}).Decode(&userDB)
+	if err != nil {
+		return err
+	}
 
-	if err == nil {
+	if userDB != nil {
 		return fmt.Errorf("email already exists")
 	}
 
@@ -44,7 +57,7 @@ func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 		"name":     userReceived.Name(),
 		"email":    userReceived.Email(),
 		"password": userReceived.Password(),
-		"admin":    false,
+		"admin":    true,
 	})
 
 	if err != nil {
@@ -59,69 +72,44 @@ func (instance *UserMongodbRepository) SignIn(email string, password string) (*s
 	if err != nil {
 		return nil, err
 	}
+	defer instance.closeConnection(conn)
 
+	collection := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER"))
 	ctx := context.Background()
 
-	userRow, err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
-		"email": email,
-	}).DecodeBytes()
+	var userDB *UserDB
+
+	err = collection.FindOne(ctx, bson.M{"email": email}).Decode(&userDB)
 
 	if err != nil {
 		return nil, err
 	}
 
-	//Call of bsoncore.Value.StringValue on binary type
-
-	//Call of bsoncore.Value.StringValue on binary type
-
-	subtipy, data := userRow.Lookup("id").Binary()
-
-	if subtipy != 0 {
-		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+	if userDB == nil {
+		return nil, fmt.Errorf("user not found")
 	}
 
-	userDBId, err := uuid.FromBytes(data)
-
-	fmt.Println(userDBId)
-
-	if err != nil {
-		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
-	}
-
-	userDB, err := user.NewBuilder().WithID(userDBId).WithName(userRow.Lookup("name").StringValue()).WithPassword(userRow.Lookup("password").StringValue()).WithEmail(userRow.Lookup("email").StringValue()).Build()
-
+	userFormatted, err := user.NewBuilder().WithID(userDB.ID).WithName(userDB.Name).WithEmail(userDB.Email).WithPassword(userDB.Password).WithAdmin(userDB.Admin).Build()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(userDB)
-
-	userPassword := userDB.Password()
-
+	err = bcrypt.CompareHashAndPassword([]byte(userFormatted.Password()), []byte(password))
 	if err != nil {
-		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+		return nil, fmt.Errorf("password incorrect")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(password))
+	jwtSecretKey := []byte(os.Getenv("JWT_SECRET"))
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":    userFormatted.ID(),
+		"authorized": true,
+		"exp":        time.Now().Add(time.Minute * 30).Unix(),
+	})
+
+	tokenString, err := token.SignedString(jwtSecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("falha ao comparar senha: %v", err)
-	}
-
-	jwtSecretKey := os.Getenv("JWT_SECRET")
-
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = userDB.ID()
-	claims["authorized"] = true
-
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
-
-	tokenString, err := token.SignedString([]byte(jwtSecretKey))
-
-	if err != nil {
-		return nil, fmt.Errorf("falha ao criar token: %v", err)
+		return nil, fmt.Errorf("error generating token: %v", err)
 	}
 
 	return &tokenString, nil
@@ -135,66 +123,56 @@ func (instance *UserMongodbRepository) VerifyUserIsLoggedOrAdmin(tokenReceived s
 
 	ctx := context.Background()
 
-	jwtSecretKey := os.Getenv("JWT_SECRET")
-
-	token, err := jwt.Parse(tokenReceived, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecretKey), nil
-	})
-
+	tokenJWT, err := token.StringToJWT(tokenReceived)
 	if err != nil {
 		return nil, fmt.Errorf("falha ao verificar token: %v", err)
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userIdFromToken := claims["user_id"]
-		userAuthorizedFromToken := claims["authorized"].(bool)
-		userIdFromTokenUUID, err := uuid.Parse(userIdFromToken.(string))
-
-		if err != nil {
-			return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
-		}
-
-		if userAuthorizedFromToken {
-			userRow, err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
-				"id": userIdFromTokenUUID,
-			}).DecodeBytes()
-
-			if err != nil {
-				return nil, fmt.Errorf("falha ao buscar usuário: %v", err)
-			}
-
-			_, data := userRow.Lookup("id").Binary()
-
-			userDBId, err := uuid.FromBytes(data)
-
-			if err != nil {
-				return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
-			}
-
-			userDB, err := user.NewBuilder().WithID(userDBId).WithName(userRow.Lookup("name").StringValue()).WithPassword(userRow.Lookup("password").StringValue()).WithEmail(userRow.Lookup("email").StringValue()).WithAdmin(userRow.Lookup("admin").Boolean()).Build()
-
-			if err != nil {
-				return nil, err
-			}
-
-			var userType string
-
-			if userDB.Admin() {
-				userType = "admin"
-				return &userType, nil
-			} else {
-				userType = "user"
-				return &userType, nil
-			}
-		}
-
-	} else {
-		return nil, fmt.Errorf("token inválido")
+	claims, err := token.ExtractClainsFromJwtToken(tokenJWT)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao verificar token: %v", err)
 	}
 
-	userNotLogged := "not logged"
+	userIdFromToken := claims["user_id"]
+	userAuthorizedFromToken := claims["authorized"].(bool)
 
-	return &userNotLogged, nil
+	userIdFromTokenUUID, err := uuid.Parse(userIdFromToken.(string))
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter id para uuid: %v", err)
+	}
+
+	if userAuthorizedFromToken {
+		var userDB *UserDB
+		err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
+			"id": userIdFromTokenUUID,
+		}).Decode(&userDB)
+
+		if err != nil {
+			return nil, fmt.Errorf("falha ao buscar usuário: %v", err)
+		}
+
+		userFormatted, err := user.NewBuilder().
+			WithID(userDB.ID).
+			WithName(userDB.Name).
+			WithEmail(userDB.Email).
+			WithPassword(userDB.Password).
+			WithAdmin(userDB.Admin).Build()
+		if err != nil {
+			return nil, err
+		}
+
+		var userType string
+
+		if userFormatted.Admin() {
+			userType = "admin"
+			return &userType, nil
+		} else {
+			userType = "user"
+			return &userType, nil
+		}
+	}
+
+	return nil, fmt.Errorf("user not authorized")
 }
 
 func NewUserMongodbRepository(connectorManager connectorManager) *UserMongodbRepository {

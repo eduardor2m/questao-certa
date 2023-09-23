@@ -36,19 +36,18 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 	}
 
 	baseReceived, err := base.NewBuilder().WithOrganization(questionDTO.Organization).WithModel(questionDTO.Model).WithYear(questionDTO.Year).WithDiscipline(questionDTO.Discipline).WithTopic(questionDTO.Topic).Build()
-
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	multipleChoiceReceived, err := question.NewBuilder().WithQuestion(questionDTO.Question).WithOptions(questionDTO.Options).WithAnswer(questionDTO.Answer).Build()
+	questionReceived, err := question.NewBuilder().WithQuestion(questionDTO.Question).WithOptions(questionDTO.Options).WithAnswer(questionDTO.Answer).Build()
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	multipleChoiceReceived.Base = *baseReceived
+	questionReceived.Base = *baseReceived
 
-	err = instance.service.CreateQuestion(*multipleChoiceReceived)
+	err = instance.service.CreateQuestion(*questionReceived)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
