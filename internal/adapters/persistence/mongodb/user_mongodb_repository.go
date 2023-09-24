@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/dtos"
 	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/token"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/user"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
@@ -21,14 +22,6 @@ type UserMongodbRepository struct {
 	connectorManager
 }
 
-type UserDB struct {
-	ID       uuid.UUID `bson:"id"`
-	Name     string    `bson:"name"`
-	Email    string    `bson:"email"`
-	Password string    `bson:"password"`
-	Admin    bool      `bson:"admin"`
-}
-
 func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
@@ -39,7 +32,7 @@ func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 
 	ctx := context.Background()
 
-	var userDB *UserDB
+	var userDB *dtos.UserDB
 
 	err = conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
 		"email": userReceived.Email(),
@@ -77,7 +70,7 @@ func (instance *UserMongodbRepository) SignIn(email string, password string) (*s
 	collection := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER"))
 	ctx := context.Background()
 
-	var userDB *UserDB
+	var userDB *dtos.UserDB
 
 	err = collection.FindOne(ctx, bson.M{"email": email}).Decode(&userDB)
 
@@ -142,7 +135,7 @@ func (instance *UserMongodbRepository) VerifyUserIsLoggedOrAdmin(tokenReceived s
 	}
 
 	if userAuthorizedFromToken {
-		var userDB *UserDB
+		var userDB *dtos.UserDB
 		err := conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
 			"id": userIdFromTokenUUID,
 		}).Decode(&userDB)

@@ -13,7 +13,7 @@ func loadQuestionRoutes(group *echo.Group) {
 	questionGroup.POST("", middlewares.Admin(questionHandlers.CreateQuestion))
 	questionGroup.POST("/import", middlewares.Admin(questionHandlers.ImportQuestionsByCSV))
 	questionGroup.GET("/:page", middlewares.Admin(questionHandlers.ListQuestions))
-	questionGroup.POST("/filter", questionHandlers.ListQuestionsByFilter)
+	questionGroup.POST("/filter", middlewares.GuardMiddleware(questionHandlers.ListQuestionsByFilter))
 	questionGroup.DELETE("/:id", middlewares.Admin(questionHandlers.DeleteQuestion))
 	questionGroup.DELETE("", middlewares.Admin(questionHandlers.DeleteAllQuestions))
 }

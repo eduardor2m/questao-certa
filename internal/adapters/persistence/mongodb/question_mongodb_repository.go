@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/dtos"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
 	"github.com/eduardor2m/questao-certa/internal/app/interfaces/repository"
-	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,20 +20,8 @@ type QuestionMongodbRepository struct {
 	connectorManager
 }
 
-type QuestionDB struct {
-	ID           uuid.UUID `bson:"id"`
-	Organization string    `bson:"organization"`
-	Model        string    `bson:"model"`
-	Year         string    `bson:"year"`
-	Discipline   string    `bson:"discipline"`
-	Topic        string    `bson:"topic"`
-	Question     string    `bson:"question"`
-	Answer       string    `bson:"answer"`
-	Options      []string  `bson:"options"`
-}
-
 func mapBSONToQuestions(c *mongo.Cursor, ctx context.Context) ([]question.Question, error) {
-	var questionsDB []QuestionDB
+	var questionsDB []dtos.QuestionDB
 
 	err := c.All(ctx, &questionsDB)
 	if err != nil {

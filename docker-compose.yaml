@@ -33,3 +33,13 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_NAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+
+  air:
+    image: cosmtrek/air:v1.45.0
+    container_name: questao-certa-air
+    ports:
+      - "8180:8080"
+    volumes:
+      - .:/home/go/app
+    working_dir: /home/go/app
+    command: [ "air", "-c", ".air.toml" ]
