@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  app:
+    build: .
+    container_name: questao-certa-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/home/go/app
+    environment:
+      PORT: ${PORT}
+      DEVELOPMENT: ${DEVELOPMENT}
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_COLLECTION: ${MONGODB_COLLECTION}
+      MONGODB_COLLECTION_USER: ${MONGODB_COLLECTION_USER}
+      MONGODB_NAME: ${MONGODB_NAME}
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_ATLAS_PASSWORD: ${MONGODB_ATLAS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - mongodb
+
   mongodb:
     image: mongo:latest
     container_name: questao-certa-mongo
