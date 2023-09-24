@@ -180,6 +180,8 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 		return nil, err
 	}
 
+	defer cursor.Close(ctx)
+
 	return mapBSONToQuestions(cursor, ctx)
 }
 
