@@ -34,12 +34,9 @@ func (instance *UserMongodbRepository) SignUp(userReceived user.User) error {
 
 	var userDB *dtos.UserDB
 
-	err = conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
+	_ = conn.Collection(os.Getenv("MONGODB_COLLECTION_USER")).FindOne(ctx, bson.M{
 		"email": userReceived.Email(),
 	}).Decode(&userDB)
-	if err != nil {
-		return err
-	}
 
 	if userDB != nil {
 		return fmt.Errorf("email already exists")

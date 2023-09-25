@@ -56,7 +56,11 @@ definitions:
     type: object
   request.UserDTO:
     properties:
+      admin:
+        type: boolean
       email:
+        type: string
+      id:
         type: string
       name:
         type: string
@@ -316,6 +320,31 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Autentica um usuário
+      tags:
+      - User
+  /user/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verifica se o usuário está logado ou é admin
+      parameters:
+      - description: Token de autenticação
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verifica se o usuário está logado ou é admin
       tags:
       - User
 securityDefinitions:
