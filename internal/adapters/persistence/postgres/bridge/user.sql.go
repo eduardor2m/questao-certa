@@ -14,16 +14,11 @@ import (
 
 const signIn = `-- name: SignIn :one
 
-SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "email" = $1 and "password" = $2 LIMIT 1
+SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1
 `
 
-type SignInParams struct {
-	Email    string
-	Password string
-}
-
-func (q *Queries) SignIn(ctx context.Context, arg SignInParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, signIn, arg.Email, arg.Password)
+func (q *Queries) SignIn(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, signIn, email)
 	var i User
 	err := row.Scan(
 		&i.ID,

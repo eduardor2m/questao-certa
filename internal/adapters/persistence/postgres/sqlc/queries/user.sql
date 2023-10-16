@@ -4,7 +4,7 @@ INSERT INTO "user" ("id", "name", "email", "password", "admin", "created_at", "u
 
 -- name: SignIn :one
 
-SELECT * FROM "user" WHERE "email" = $1 and "password" = $2 LIMIT 1;
+SELECT * FROM "user" WHERE "email" = $1 LIMIT 1;
 
 -- name: VerifyUserIsLoggedOrAdmin :one
 
