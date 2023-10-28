@@ -40,7 +40,7 @@ func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
 	}
 	var client *mongo.Client
 	if developmentBool {
-		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+mongodbUser+":"+mongodbPassword+"@"+mongodbHost+":"+mongodbPort))
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+mongodbUser+":"+mongodbPassword+"@"+mongodbHost+":"+mongodbPort+"/?authSource=admin"))
 		if err != nil {
 			return nil, err
 		}
@@ -52,6 +52,8 @@ func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
 	}
 
 	collection := client.Database(mongodbName)
+
+	err = client.Ping(ctx, nil)
 
 	if err != nil {
 		log.Fatal(err)
