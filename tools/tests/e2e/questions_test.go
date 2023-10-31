@@ -7,6 +7,7 @@ import (
 
 	"github.com/eduardor2m/questao-certa/tools/tests/data"
 	"github.com/eduardor2m/questao-certa/tools/tests/data/jsons/filenames"
+	"github.com/eduardor2m/questao-certa/tools/tests/e2e/utils"
 )
 
 func TestCreateQuestion(t *testing.T) {
@@ -20,10 +21,14 @@ func TestCreateQuestion(t *testing.T) {
 		return
 	}
 
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2OTg3Mzc4ODAsInVzZXJfaWQiOiIyYzViNTdjZS03NTM0LTExZWUtYjAxNC0wMjQyYWMxMjAwMDUifQ.VkPWCPETYHDUFAY_AcqSWvzkseDb-GmMy_6Xm_kJyqs"
+	token, err := utils.GenerateToken()
+	if err != nil {
+		t.Errorf("Erro ao gerar token: %v", err)
+		return
+	}
 
 	clientRequest.Header.Set("Content-Type", "application/json")
-	clientRequest.Header.Set("Authorization", "Bearer "+token)
+	clientRequest.Header.Set("Authorization", "Bearer "+*token)
 
 	serverResponse, err := http.DefaultClient.Do(clientRequest)
 
@@ -39,18 +44,80 @@ func TestCreateQuestion(t *testing.T) {
 	}
 }
 
-func TestGetQuestion(t *testing.T) {
-	t.Skip("Not implemented")
+func TestGetQuestions(t *testing.T) {
+	clientRequest, err := http.NewRequest("GET", "http://localhost:8180/api/question/1", nil)
+
+	if err != nil {
+		t.Errorf("Erro ao criar a solicitação: %v", err)
+		return
+	}
+
+	token, err := utils.GenerateToken()
+
+	if err != nil {
+		t.Errorf("Erro ao gerar token: %v", err)
+		return
+	}
+
+	clientRequest.Header.Set("Content-Type", "application/json")
+
+	clientRequest.Header.Set("Authorization", "Bearer "+*token)
+
+	serverResponse, err := http.DefaultClient.Do(clientRequest)
+
+	if err != nil {
+		t.Errorf("Erro ao fazer a solicitação: %v", err)
+		return
+	}
+
+	defer serverResponse.Body.Close()
+
+	if serverResponse.StatusCode != http.StatusOK {
+		t.Errorf("Esperado código de status %d, mas obteve %d", http.StatusOK, serverResponse.StatusCode)
+		return
+	}
 }
 
-func TestGetQuestions(t *testing.T) {
-	t.Skip("Not implemented")
+func TestFilterQuestions(t *testing.T) {
+	filterData := data.GetFilterMock(filenames.FilterMock)
+	requestBody := bytes.NewReader(filterData)
+	clientRequest, err := http.NewRequest("POST", "http://localhost:8180/api/question/filter", requestBody)
+
+	if err != nil {
+		t.Errorf("Erro ao criar a solicitação: %v", err)
+		return
+	}
+
+	token, err := utils.GenerateToken()
+
+	if err != nil {
+		t.Errorf("Erro ao gerar token: %v", err)
+		return
+	}
+
+	clientRequest.Header.Set("Content-Type", "application/json")
+
+	clientRequest.Header.Set("Authorization", "Bearer "+*token)
+
+	serverResponse, err := http.DefaultClient.Do(clientRequest)
+
+	if err != nil {
+		t.Errorf("Erro ao fazer a solicitação: %v", err)
+		return
+	}
+
+	defer serverResponse.Body.Close()
+
+	if serverResponse.StatusCode != http.StatusOK {
+		t.Errorf("Esperado código de status %d, mas obteve %d", http.StatusOK, serverResponse.StatusCode)
+		return
+	}
 }
 
 func TestUpdateQuestion(t *testing.T) {
-	t.Skip("Not implemented")
+	t.Skip("Teste não implementado")
 }
 
 func TestDeleteQuestion(t *testing.T) {
-	t.Skip("Not implemented")
+	t.Skip("Teste não implementado")
 }
