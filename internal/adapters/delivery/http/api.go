@@ -54,7 +54,6 @@ func NewAPI(options *Options) API {
 
 func (instance *api) Serve() {
 	instance.loadRoutes()
-	instance.echoInstance.Use(middlewares.GuardMiddleware)
 	instance.echoInstance.Use(instance.getCORSSettings())
 
 	port := os.Getenv("PORT")

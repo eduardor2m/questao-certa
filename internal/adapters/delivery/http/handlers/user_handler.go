@@ -72,6 +72,7 @@ func (instance UserHandler) SignIn(context echo.Context) error {
 	}
 
 	context.Response().Header().Set("Authorization", *token)
+	context.Response().Header().Set("Access-Control-Expose-Headers", "Authorization")
 
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User logged successfully"})
 }

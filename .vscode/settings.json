@@ -10,4 +10,15 @@
     "persistence": "upload",
     "mongodb": "database",
   },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "172.18.0.1",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "questao-certa",
+      "database": "questao-certa",
+      "username": "postgres"
+    }
+  ],
 }

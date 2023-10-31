@@ -355,6 +355,44 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/verify": {
+            "get": {
+                "description": "Verifica se o usuário está logado ou é admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Verifica se o usuário está logado ou é admin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token de autenticação",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -435,7 +473,13 @@ const docTemplate = `{
         "request.UserDTO": {
             "type": "object",
             "properties": {
+                "admin": {
+                    "type": "boolean"
+                },
                 "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "name": {

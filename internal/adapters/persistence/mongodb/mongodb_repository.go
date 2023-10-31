@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,16 +28,19 @@ func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
 		mongodbUser          = os.Getenv("MONGODB_USER")
 		mongodbHost          = os.Getenv("MONGODB_HOST")
 		mongodbPort          = os.Getenv("MONGODB_PORT")
+		development          = os.Getenv("DEVELOPMENT")
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	dev := os.Getenv("DEVELOPMENT")
+	developmentBool, err := strconv.ParseBool(development)
+	if err != nil {
+		return nil, err
+	}
 	var client *mongo.Client
-	var err error
-	if dev == "true" {
-		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+mongodbUser+":"+mongodbPassword+"@"+mongodbHost+":"+mongodbPort))
+	if developmentBool {
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+mongodbUser+":"+mongodbPassword+"@"+mongodbHost+":"+mongodbPort+"/?authSource=admin"))
 		if err != nil {
 			return nil, err
 		}
@@ -48,6 +52,8 @@ func (dcm *DatabaseConnectorManager) getConnection() (*mongo.Database, error) {
 	}
 
 	collection := client.Database(mongodbName)
+
+	err = client.Ping(ctx, nil)
 
 	if err != nil {
 		log.Fatal(err)

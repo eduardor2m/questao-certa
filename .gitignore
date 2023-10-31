@@ -2,3 +2,6 @@
 *.env
 .idea
 /tmp
+.air.toml
+/mongo
+/postgres

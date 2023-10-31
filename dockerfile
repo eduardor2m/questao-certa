@@ -1,20 +1,15 @@
-FROM golang:1.21.0 AS build
+FROM golang:1.21
 
-WORKDIR /app
+WORKDIR /home/go/app
 
-COPY go.mod go.sum ./
-RUN go mod download
+RUN apt-get update && apt-get install -y openssl
 
-COPY . .
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.1
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o api ./cmd/application/main.go
+RUN go install go.uber.org/mock/mockgen@v0.2.0
 
-FROM scratch
-
-WORKDIR /app
-
-COPY --from=build /app/api .
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.20.0
 
 EXPOSE 8080
 
-CMD ["./api"]
+CMD [ "tail", "-f", "/dev/null" ]

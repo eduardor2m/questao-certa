@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/eduardor2m/questao-certa/internal/adapters/delivery/http/handlers/dto/request"
+	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/dtos"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
@@ -20,8 +20,8 @@ type QuestionMongodbRepository struct {
 	connectorManager
 }
 
-func formatter(c *mongo.Cursor, ctx context.Context) ([]question.Question, error) {
-	var questionsDB []request.QuestionDTO
+func mapBSONToQuestions(c *mongo.Cursor, ctx context.Context) ([]question.Question, error) {
+	var questionsDB []dtos.QuestionDB
 
 	err := c.All(ctx, &questionsDB)
 	if err != nil {
@@ -55,6 +55,8 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 	if err != nil {
 		return err
 	}
+
+	defer instance.closeConnection(conn)
 
 	ctx := context.Background()
 
@@ -116,51 +118,27 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 }
 
 func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Question, error) {
+	ctx := context.Background()
+	perPage := 3
+	collectionName := os.Getenv("MONGODB_COLLECTION")
+
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return nil, err
 	}
+	defer instance.closeConnection(conn)
 
-	ctx := context.Background()
-	perPage := 3
-
-	findOptions := options.Find()
-
-	findOptions.SetLimit(int64(perPage))
-	findOptions.SetSkip(int64(perPage * (page - 1)))
-
-	collectionName := os.Getenv("MONGODB_COLLECTION")
+	findOptions := options.Find().
+		SetLimit(int64(perPage)).
+		SetSkip(int64(perPage * (page - 1)))
 
 	cursor, err := conn.Collection(collectionName).Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 
-	var questionsDB []request.QuestionDTO
-	err = cursor.All(ctx, &questionsDB)
-	if err != nil {
-		return nil, err
-	}
-
-	var questionsFormatted []question.Question
-
-	for _, questionDB := range questionsDB {
-		baseFormatted, err := base.NewBuilder().WithID(questionDB.ID).WithOrganization(questionDB.Organization).WithModel(questionDB.Model).WithYear(questionDB.Year).WithDiscipline(questionDB.Discipline).WithTopic(questionDB.Topic).Build()
-		if err != nil {
-			return nil, err
-		}
-
-		questionFormatted, err := question.NewBuilder().WithQuestion(questionDB.Question).WithAnswer(questionDB.Answer).WithOptions(questionDB.Options).Build()
-		if err != nil {
-			return nil, err
-		}
-
-		questionFormatted.Base = *baseFormatted
-
-		questionsFormatted = append(questionsFormatted, *questionFormatted)
-	}
-
-	return questionsFormatted, nil
+	return mapBSONToQuestions(cursor, ctx)
 }
 
 func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter) ([]question.Question, error) {
@@ -168,6 +146,8 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 	if err != nil {
 		return nil, err
 	}
+
+	defer instance.closeConnection(conn)
 
 	ctx := context.Background()
 	findOptions := options.Find()
@@ -197,10 +177,12 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 
 	cursor, err := conn.Collection(collectionName).Find(ctx, filterQuery, findOptions)
 	if err != nil {
-		return []question.Question{}, err
+		return nil, err
 	}
 
-	return formatter(cursor, ctx)
+	defer cursor.Close(ctx)
+
+	return mapBSONToQuestions(cursor, ctx)
 }
 
 func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
@@ -208,6 +190,8 @@ func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer instance.closeConnection(conn)
 
 	ctx := context.Background()
 
@@ -226,6 +210,8 @@ func (instance *QuestionMongodbRepository) DeleteAllQuestions() error {
 	if err != nil {
 		return err
 	}
+
+	defer instance.closeConnection(conn)
 
 	ctx := context.Background()
 
