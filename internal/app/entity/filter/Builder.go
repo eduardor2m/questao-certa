@@ -19,13 +19,18 @@ func (instance *Builder) WithYear(year string) *Builder {
 	return instance
 }
 
-func (instance *Builder) WithContent(content string) *Builder {
-	instance.content = content
+func (instance *Builder) WithDiscipline(discipline string) *Builder {
+	instance.discipline = discipline
 	return instance
 }
 
 func (instance *Builder) WithTopic(topic string) *Builder {
 	instance.topic = topic
+	return instance
+}
+
+func (instance *Builder) WithQuantity(quantity int64) *Builder {
+	instance.quantity = quantity
 	return instance
 }
 

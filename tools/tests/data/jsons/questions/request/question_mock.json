@@ -1,0 +1,10 @@
+{
+	"organization": "cespe",
+	"model": "multiple_choice",
+	"year": "2021",
+	"discipline": "matematica",
+	"topic": "raiz quadrada",
+	"question": "Exemplo de Pergunta",
+	"options": ["(A) Opção A", "(B) Opção B", "(C) Opção C", "(D) Opção C", "(E) Opção C"],
+	"answer": "(A) Opção A"
+}

@@ -1,10 +1,87 @@
 basePath: /api
 definitions:
-  request.MultipleChoiceDTO:
+  request.FilterDTO:
+    properties:
+      discipline:
+        example: ENGENHARIA DE PRODUÇÃO
+        type: string
+      organization:
+        example: CESGRANRIO
+        type: string
+      quantity:
+        example: 10
+        type: integer
+      topic:
+        example: ADMINISTRAÇÃO DA PRODUÇÃO
+        type: string
+      year:
+        example: "2019"
+        type: string
+    type: object
+  request.QuestionDTO:
+    properties:
+      answer:
+        example: Aumentar a qualidade
+        type: string
+      discipline:
+        example: ENGENHARIA DE PRODUÇÃO
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      model:
+        example: multiple_choice
+        type: string
+      options:
+        example:
+        - '["Aumentar a produtividade"'
+        - ' "Diminuir a produtividade"'
+        - ' "Aumentar a qualidade"'
+        - ' "Diminuir a qualidade"]'
+        items:
+          type: string
+        type: array
+      organization:
+        example: CESGRANRIO
+        type: string
+      question:
+        example: Qual o objetivo da administração da produção?
+        type: string
+      topic:
+        example: ADMINISTRAÇÃO DA PRODUÇÃO
+        type: string
+      year:
+        example: "2019"
+        type: string
+    type: object
+  request.UserDTO:
+    properties:
+      admin:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.InfoResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.Question:
     properties:
       answer:
         type: string
-      content:
+      discipline:
         type: string
       id:
         type: string
@@ -23,25 +100,35 @@ definitions:
       year:
         type: string
     type: object
-  response.ErrorResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  response.InfoResponse:
-    properties:
-      message:
-        type: string
-    type: object
 info:
   contact:
     email: deveduardomelo@gmail.com
     name: Eduardo Melo
-  description: Reserva de quartos para Hotéis
-  title: Reservify API
+  description: API para gerenciamento de questões e respostas
+  title: Questão Certa API
   version: "1.0"
 paths:
   /question:
+    delete:
+      consumes:
+      - application/json
+      description: Deleta todas as questões
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Deleta todas as questões
+      tags:
+      - Question
     post:
       consumes:
       - application/json
@@ -53,11 +140,11 @@ paths:
         name: question
         required: true
         schema:
-          $ref: '#/definitions/request.MultipleChoiceDTO'
+          $ref: '#/definitions/request.QuestionDTO'
       produces:
       - application/json
       responses:
-        "200":
+        "201":
           description: Questão criada com sucesso
           schema:
             $ref: '#/definitions/response.InfoResponse'
@@ -70,6 +157,196 @@ paths:
       summary: Cria uma questão de múltipla escolha
       tags:
       - Question
+  /question/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleta uma questão
+      parameters:
+      - description: ID da questão
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Deleta uma questão
+      tags:
+      - Question
+  /question/{page}:
+    get:
+      consumes:
+      - application/json
+      description: Lista todas as questões
+      parameters:
+      - description: Número da página
+        in: path
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.Question'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Lista todas as questões
+      tags:
+      - Question
+  /question/filter:
+    post:
+      consumes:
+      - application/json
+      description: Lista questões por filtro
+      parameters:
+      - description: Filtro para busca de questões
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/request.FilterDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.Question'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Lista questões por filtro
+      tags:
+      - Question
+  /question/import:
+    post:
+      consumes:
+      - application/json
+      description: Importa questões de múltipla escolha a partir de um arquivo CSV
+      parameters:
+      - description: Arquivo CSV com as questões de múltipla escolha
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Importa questões de múltipla escolha
+      tags:
+      - Question
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Cria um usuário
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Erro ao criar usuário
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Cria um usuário
+      tags:
+      - User
+  /user/signin:
+    post:
+      consumes:
+      - application/json
+      description: Autentica um usuário
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Autentica um usuário
+      tags:
+      - User
+  /user/verify:
+    get:
+      consumes:
+      - application/json
+      description: Verifica se o usuário está logado ou é admin
+      parameters:
+      - description: Token de autenticação
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.InfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Verifica se o usuário está logado ou é admin
+      tags:
+      - User
 securityDefinitions:
   bearerAuth:
     in: header

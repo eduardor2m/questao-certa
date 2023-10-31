@@ -21,4 +21,5 @@ func (instance *routes) Load(group *echo.Group) {
 	group.GET("/docs/*", echoSwagger.WrapHandler)
 
 	loadQuestionRoutes(group)
+	loadUserRoutes(group)
 }
