@@ -13,7 +13,7 @@ func TestSignIn(t *testing.T) {
 	userData := data.GetSignInMock(filenames.SignInMock)
 	requestBody := bytes.NewReader(userData)
 
-	clientRequest, err := http.NewRequest("POST", "http://localhost:8180/api/user/signin", requestBody)
+	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/user/signin", requestBody)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)
@@ -36,5 +36,43 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
-	t.Skip("Not implemented")
+	userData := data.GetSignUpMock(filenames.SignUpMock)
+	requestBody := bytes.NewReader(userData)
+
+	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/user", requestBody)
+
+	if err != nil {
+		t.Errorf("Erro ao criar a solicitação: %v", err)
+		return
+	}
+	clientRequest.Header.Set("Content-Type", "application/json")
+
+	serverResponse, err := http.DefaultClient.Do(clientRequest)
+
+	if err != nil {
+		t.Errorf("Erro ao fazer a solicitação: %v", err)
+		return
+	}
+	defer serverResponse.Body.Close()
+
+	if serverResponse.StatusCode != http.StatusOK {
+		t.Errorf("Esperado código de status %d, mas obteve %d", http.StatusCreated, serverResponse.StatusCode)
+		return
+	}
+}
+
+func TestGetUser(t *testing.T) {
+	t.Skip("Teste não implementado")
+}
+
+func TestUpdateUser(t *testing.T) {
+	t.Skip("Teste não implementado")
+}
+
+func TestDeleteUser(t *testing.T) {
+	t.Skip("Teste não implementado")
+}
+
+func TestGetUsers(t *testing.T) {
+	t.Skip("Teste não implementado")
 }
