@@ -13,7 +13,7 @@ func GenerateToken() (*string, error) {
 	userData := data.GetSignInMock(filenames.SignInMock)
 	requestBody := bytes.NewReader(userData)
 
-	clientRequest, err := http.NewRequest("POST", "http://localhost:8180/api/user/signin", requestBody)
+	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/user/signin", requestBody)
 
 	if err != nil {
 		return nil, err
