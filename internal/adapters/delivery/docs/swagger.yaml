@@ -3,7 +3,7 @@ definitions:
   request.FilterDTO:
     properties:
       discipline:
-        example: ENGENHARIA DE PRODUÇÃO
+        example: Engenharia de Produção
         type: string
       organization:
         example: CESGRANRIO
@@ -12,10 +12,10 @@ definitions:
         example: 10
         type: integer
       topic:
-        example: ADMINISTRAÇÃO DA PRODUÇÃO
+        example: Administração da Produção
         type: string
       year:
-        example: "2019"
+        example: "2023"
         type: string
     type: object
   request.QuestionDTO:
@@ -24,10 +24,7 @@ definitions:
         example: Aumentar a qualidade
         type: string
       discipline:
-        example: ENGENHARIA DE PRODUÇÃO
-        type: string
-      id:
-        example: 550e8400-e29b-41d4-a716-446655440000
+        example: Engehnaria de Produção
         type: string
       model:
         example: multiple_choice
@@ -48,23 +45,31 @@ definitions:
         example: Qual o objetivo da administração da produção?
         type: string
       topic:
-        example: ADMINISTRAÇÃO DA PRODUÇÃO
+        example: Administração da Produção
         type: string
       year:
-        example: "2019"
+        example: "2023"
         type: string
     type: object
   request.UserDTO:
     properties:
-      admin:
-        type: boolean
       email:
-        type: string
-      id:
+        example: dudu@gmail.com
         type: string
       name:
+        example: Eduardo Melo
         type: string
       password:
+        example: "123456"
+        type: string
+    type: object
+  request.UserLoginDTO:
+    properties:
+      email:
+        example: dudu@gmail.com
+        type: string
+      password:
+        example: "123456"
         type: string
     type: object
   response.ErrorResponse:
@@ -307,7 +312,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/request.UserDTO'
+          $ref: '#/definitions/request.UserLoginDTO'
       produces:
       - application/json
       responses:

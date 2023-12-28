@@ -7,7 +7,7 @@ import (
 )
 
 func loadUserRoutes(group *echo.Group) {
-	userGroup := group.Group("/user") // middlewares.Admin,
+	userGroup := group.Group("/user")
 
 	userHandlers := dicontainer.GetUserHandler()
 
