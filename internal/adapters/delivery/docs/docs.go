@@ -336,7 +336,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.UserDTO"
+                            "$ref": "#/definitions/request.UserLoginDTO"
                         }
                     }
                 ],
@@ -401,7 +401,7 @@ const docTemplate = `{
             "properties": {
                 "discipline": {
                     "type": "string",
-                    "example": "ENGENHARIA DE PRODUÇÃO"
+                    "example": "Engenharia de Produção"
                 },
                 "organization": {
                     "type": "string",
@@ -413,11 +413,11 @@ const docTemplate = `{
                 },
                 "topic": {
                     "type": "string",
-                    "example": "ADMINISTRAÇÃO DA PRODUÇÃO"
+                    "example": "Administração da Produção"
                 },
                 "year": {
                     "type": "string",
-                    "example": "2019"
+                    "example": "2023"
                 }
             }
         },
@@ -430,11 +430,7 @@ const docTemplate = `{
                 },
                 "discipline": {
                     "type": "string",
-                    "example": "ENGENHARIA DE PRODUÇÃO"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "example": "Engehnaria de Produção"
                 },
                 "model": {
                     "type": "string",
@@ -462,31 +458,41 @@ const docTemplate = `{
                 },
                 "topic": {
                     "type": "string",
-                    "example": "ADMINISTRAÇÃO DA PRODUÇÃO"
+                    "example": "Administração da Produção"
                 },
                 "year": {
                     "type": "string",
-                    "example": "2019"
+                    "example": "2023"
                 }
             }
         },
         "request.UserDTO": {
             "type": "object",
             "properties": {
-                "admin": {
-                    "type": "boolean"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "dudu@gmail.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Eduardo Melo"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456"
+                }
+            }
+        },
+        "request.UserLoginDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "dudu@gmail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "123456"
                 }
             }
         },

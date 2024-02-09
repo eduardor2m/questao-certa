@@ -10,6 +10,8 @@ import (
 	"github.com/eduardor2m/questao-certa/tools/tests/e2e/utils"
 )
 
+const baseURL = "http://localhost:8180"
+
 func TestCreateQuestion(t *testing.T) {
 	questionData := data.GetQuestionMock(filenames.QuestionMock)
 	requestBody := bytes.NewReader(questionData)

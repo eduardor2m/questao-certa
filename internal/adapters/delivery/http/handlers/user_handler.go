@@ -52,7 +52,7 @@ func (instance UserHandler) SignUp(context echo.Context) error {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param user body request.UserDTO true "Dados do usuário"
+// @Param user body request.UserLoginDTO true "Dados do usuário"
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /user/signin [post]

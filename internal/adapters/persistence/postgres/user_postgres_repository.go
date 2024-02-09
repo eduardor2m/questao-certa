@@ -25,7 +25,7 @@ func (instance UserPostgresRepository) SignUp(u user.User) error {
 	conn, err := instance.getConnection()
 
 	if err != nil {
-		return fmt.Errorf("falha ao obter conexão com o banco de dados: %v", err)
+		return fmt.Errorf("error getting connection: %v", err)
 	}
 
 	defer instance.closeConnection(conn)
@@ -45,7 +45,7 @@ func (instance UserPostgresRepository) SignUp(u user.User) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("falha ao criar usuário: %v", err)
+		return fmt.Errorf("error creating user: %v", err)
 	}
 
 	return nil
@@ -72,7 +72,7 @@ func (instance UserPostgresRepository) SignIn(email string, password string) (*s
 	err = bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(password))
 
 	if err != nil {
-		return nil, fmt.Errorf("falha ao comparar senha: %v", err)
+		return nil, fmt.Errorf("error comparing password: %v", err)
 	}
 
 	jwtSecretKey := os.Getenv("JWT_SECRET")

@@ -1,9 +1,12 @@
 package request
 
 type UserDTO struct {
-	ID       string `json:"id,omitempty"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Admin    bool   `json:"admin,omitempty"`
+	Name     string `json:"name" example:"Eduardo Melo"`
+	Email    string `json:"email" example:"dudu@gmail.com"`
+	Password string `json:"password" example:"123456"`
+}
+
+type UserLoginDTO struct {
+	Email    string `json:"email" example:"dudu@gmail.com"`
+	Password string `json:"password" example:"123456"`
 }
