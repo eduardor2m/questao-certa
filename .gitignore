@@ -5,3 +5,4 @@
 .air.toml
 /mongo
 /postgres
+.DS_Store
