@@ -77,6 +77,71 @@ func (instance UserHandler) SignIn(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User logged successfully"})
 }
 
+func (instance UserHandler) DeleteUserTest(context echo.Context) error {
+	type UserDeleteDTO struct {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+
+	var userDTO UserDeleteDTO
+
+	err := context.Bind(&userDTO)
+
+	err = instance.service.DeleteUserTest(userDTO.Email, userDTO.Name)
+
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User deleted successfully"})
+}
+
+func (instance UserHandler) ListUsers(context echo.Context) error {
+	users, err := instance.service.ListUsers()
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	var usersJson []response.UserDTO
+
+	for _, user := range users {
+		userJson := response.UserDTO{
+			ID:        user.ID(),
+			Name:      user.Name(),
+			Email:     user.Email(),
+			Password:  user.Password(),
+			Admin:     user.Admin(),
+			CreatedAt: user.CreatedAt().Format("2006-01-02T15:04:05Z"),
+			UpdatedAt: user.UpdatedAt().Format("2006-01-02T15:04:05Z"),
+		}
+
+		usersJson = append(usersJson, userJson)
+	}
+
+	return context.JSON(http.StatusOK, usersJson)
+}
+
+func (instance UserHandler) GetUserByEmail(context echo.Context) error {
+	email := context.Param("email")
+
+	user, err := instance.service.GetUserByEmail(email)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
+
+	userJson := response.UserDTO{
+		ID:        user.ID(),
+		Name:      user.Name(),
+		Email:     user.Email(),
+		Password:  user.Password(),
+		Admin:     user.Admin(),
+		CreatedAt: user.CreatedAt().Format("2006-01-02T15:04:05Z"),
+		UpdatedAt: user.UpdatedAt().Format("2006-01-02T15:04:05Z"),
+	}
+
+	return context.JSON(http.StatusOK, userJson)
+}
+
 // @Summary Verifica se o usuário está logado ou é admin
 // @Description Verifica se o usuário está logado ou é admin
 // @Tags User

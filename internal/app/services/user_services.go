@@ -40,6 +40,18 @@ func (instance *UserServices) SignIn(email string, password string) (*string, er
 	return instance.userRepository.SignIn(email, password)
 }
 
+func (instance *UserServices) DeleteUserTest(email string, username string) error {
+	return instance.userRepository.DeleteUserTest(email, username)
+}
+
+func (instance *UserServices) ListUsers() ([]user.User, error) {
+	return instance.userRepository.ListUsers()
+}
+
+func (instance *UserServices) GetUserByEmail(email string) (*user.User, error) {
+	return instance.userRepository.GetUserByEmail(email)
+}
+
 func (instance *UserServices) VerifyUserIsLoggedOrAdmin(token string) (*string, error) {
 	return instance.userRepository.VerifyUserIsLoggedOrAdmin(token)
 }

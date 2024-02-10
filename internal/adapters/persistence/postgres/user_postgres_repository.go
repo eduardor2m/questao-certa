@@ -94,6 +94,44 @@ func (instance UserPostgresRepository) SignIn(email string, password string) (*s
 
 }
 
+func (instance UserPostgresRepository) DeleteUserTest(email string, name string) error {
+	conn, err := instance.getConnection()
+
+	if err != nil {
+		return fmt.Errorf("error getting connection: %v", err)
+	}
+
+	defer instance.closeConnection(conn)
+
+	ctx := context.Background()
+
+	queries := bridge.New(conn)
+
+	userDB, err := queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		return fmt.Errorf("error getting user: %v", err)
+	}
+
+	if userDB.Admin {
+		return fmt.Errorf("error deleting user: user is admin")
+	}
+
+	if userDB.Name != name {
+		return fmt.Errorf("error deleting user: user name does not match")
+	}
+
+	err = queries.DeleteUserTest(ctx, bridge.DeleteUserTestParams{
+		Email: email,
+		Name:  name,
+	})
+
+	if err != nil {
+		return fmt.Errorf("error deleting user: %v", err)
+	}
+
+	return nil
+}
+
 func (instance UserPostgresRepository) VerifyUserIsLoggedOrAdmin(tokenJwt string) (*string, error) {
 	conn, err := instance.getConnection()
 	if err != nil {
@@ -138,6 +176,64 @@ func (instance UserPostgresRepository) VerifyUserIsLoggedOrAdmin(tokenJwt string
 	}
 
 	return &typeUser, nil
+}
+
+func (instance UserPostgresRepository) ListUsers() ([]user.User, error) {
+	conn, err := instance.getConnection()
+	if err != nil {
+		return nil, fmt.Errorf("error getting connection: %v", err)
+	}
+
+	defer instance.closeConnection(conn)
+
+	ctx := context.Background()
+
+	queries := bridge.New(conn)
+
+	usersDB, err := queries.ListUsers(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting users: %v", err)
+	}
+
+	users := make([]user.User, 0)
+
+	for _, userDB := range usersDB {
+		userFormatted, err := user.NewBuilder().WithID(userDB.ID).WithCreatedAt(userDB.CreatedAt).WithUpdatedAt(userDB.UpdatedAt).WithAdmin(userDB.Admin).WithName(userDB.Name).WithEmail(userDB.Email).WithPassword(userDB.Password).Build()
+		if err != nil {
+			return nil, fmt.Errorf("error formatting user: %v", err)
+		}
+
+		users = append(users, *userFormatted)
+	}
+
+	return users, nil
+}
+
+func (instance UserPostgresRepository) GetUserByEmail(email string) (*user.User, error) {
+	conn, err := instance.getConnection()
+	if err != nil {
+		return nil, fmt.Errorf("error getting connection: %v", err)
+	}
+
+	defer instance.closeConnection(conn)
+
+	ctx := context.Background()
+
+	queries := bridge.New(conn)
+
+	userDB, err := queries.GetUserByEmail(ctx, email)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %v", err)
+	}
+
+	userFormatted, err := user.NewBuilder().WithID(userDB.ID).WithCreatedAt(userDB.CreatedAt).WithUpdatedAt(userDB.UpdatedAt).WithAdmin(userDB.Admin).WithName(userDB.Name).WithEmail(userDB.Email).WithPassword(userDB.Password).Build()
+	if err != nil {
+		return nil, fmt.Errorf("error formatting user: %v", err)
+	}
+
+	return userFormatted, nil
 }
 
 func NewUserPostgresRepository(connectorManager connectorManager) *UserPostgresRepository {

@@ -118,6 +118,8 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 			Question:     questionReceivedDB.Question(),
 			Options:      questionReceivedDB.Options(),
 			Answer:       questionReceivedDB.Answer(),
+			CreatedAt:    questionReceivedDB.CreatedAt().Format("2006-01-02T15:04:05Z"),
+			UpdatedAt:    questionReceivedDB.UpdatedAt().Format("2006-01-02T15:04:05Z"),
 		}
 
 		questionsDTO = append(questionsDTO, questionDTO)
@@ -172,6 +174,8 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 			Question:     questionReceivedDB.Question(),
 			Options:      questionReceivedDB.Options(),
 			Answer:       questionReceivedDB.Answer(),
+			CreatedAt:    questionReceivedDB.CreatedAt().Format("2006-01-02T15:04:05Z"),
+			UpdatedAt:    questionReceivedDB.UpdatedAt().Format("2006-01-02T15:04:05Z"),
 		}
 
 		questionsDTO = append(questionsDTO, questionDTO)

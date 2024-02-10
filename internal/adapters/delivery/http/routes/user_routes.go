@@ -14,4 +14,7 @@ func loadUserRoutes(group *echo.Group) {
 	userGroup.POST("", userHandlers.SignUp)
 	userGroup.POST("/signin", userHandlers.SignIn)
 	userGroup.GET("/verify", middlewares.Admin(userHandlers.VerifyUserIsLoggedOrAdmin))
+	userGroup.GET("/list", middlewares.Admin(userHandlers.ListUsers))
+	userGroup.GET("/:email", middlewares.Admin(userHandlers.GetUserByEmail))
+	userGroup.DELETE("/delete", middlewares.Admin(userHandlers.DeleteUserTest))
 }

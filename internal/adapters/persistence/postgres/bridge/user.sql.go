@@ -12,6 +12,77 @@ import (
 	"github.com/google/uuid"
 )
 
+const deleteUserTest = `-- name: DeleteUserTest :exec
+
+DELETE FROM "user" WHERE "email" = $1 AND "name" = $2
+`
+
+type DeleteUserTestParams struct {
+	Email string
+	Name  string
+}
+
+func (q *Queries) DeleteUserTest(ctx context.Context, arg DeleteUserTestParams) error {
+	_, err := q.db.ExecContext(ctx, deleteUserTest, arg.Email, arg.Name)
+	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+
+SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.Admin,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+
+SELECT id, name, email, password, admin, created_at, updated_at FROM "user" ORDER BY "created_at" DESC
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Password,
+			&i.Admin,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const signIn = `-- name: SignIn :one
 
 SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1

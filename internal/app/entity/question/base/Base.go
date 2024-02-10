@@ -1,6 +1,10 @@
 package base
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Base struct {
 	id           uuid.UUID
@@ -9,6 +13,8 @@ type Base struct {
 	year         string
 	discipline   string
 	topic        string
+	created_at   time.Time
+	updated_at   time.Time
 }
 
 func (instance *Base) ID() uuid.UUID {
@@ -33,4 +39,12 @@ func (instance *Base) Discipline() string {
 
 func (instance *Base) Topic() string {
 	return instance.topic
+}
+
+func (instance *Base) CreatedAt() time.Time {
+	return instance.created_at
+}
+
+func (instance *Base) UpdatedAt() time.Time {
+	return instance.updated_at
 }

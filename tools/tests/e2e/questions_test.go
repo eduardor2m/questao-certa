@@ -10,13 +10,13 @@ import (
 	"github.com/eduardor2m/questao-certa/tools/tests/e2e/utils"
 )
 
-const baseURL = "http://localhost:8180"
+const baseURL = "http://questao-certa-air:8080/api"
 
 func TestCreateQuestion(t *testing.T) {
 	questionData := data.GetQuestionMock(filenames.QuestionMock)
 	requestBody := bytes.NewReader(questionData)
 
-	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/question", requestBody)
+	clientRequest, err := http.NewRequest("POST", baseURL+"/question", requestBody)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)
@@ -47,7 +47,7 @@ func TestCreateQuestion(t *testing.T) {
 }
 
 func TestGetQuestions(t *testing.T) {
-	clientRequest, err := http.NewRequest("GET", "http://questao-certa-air:8080/api/question/1", nil)
+	clientRequest, err := http.NewRequest("GET", baseURL+"/question/1", nil)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)
@@ -83,7 +83,7 @@ func TestGetQuestions(t *testing.T) {
 func TestFilterQuestions(t *testing.T) {
 	filterData := data.GetFilterMock(filenames.FilterMock)
 	requestBody := bytes.NewReader(filterData)
-	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/question/filter", requestBody)
+	clientRequest, err := http.NewRequest("POST", baseURL+"/question/filter", requestBody)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)

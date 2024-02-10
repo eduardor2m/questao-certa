@@ -6,6 +6,18 @@ INSERT INTO "user" ("id", "name", "email", "password", "admin", "created_at", "u
 
 SELECT * FROM "user" WHERE "email" = $1 LIMIT 1;
 
+-- name: DeleteUserTest :exec
+
+DELETE FROM "user" WHERE "email" = $1 AND "name" = $2;
+
+-- name: ListUsers :many
+
+SELECT * FROM "user" ORDER BY "created_at" DESC;
+
+-- name: GetUserByEmail :one
+
+SELECT * FROM "user" WHERE "email" = $1 LIMIT 1;
+
 -- name: VerifyUserIsLoggedOrAdmin :one
 
 SELECT * FROM "user" WHERE "id" = $1 LIMIT 1;
