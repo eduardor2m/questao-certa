@@ -8,6 +8,7 @@ type UserDTO struct {
 	Email     string    `json:"email" example:"dudu@gmail.com"`
 	Password  string    `json:"password" example:"123456"`
 	Admin     bool      `json:"admin" example:"false"`
+	IsActive  bool      `json:"is_active" example:"true"`
 	CreatedAt string    `json:"created_at" example:"2021-08-01T00:00:00Z"`
 	UpdatedAt string    `json:"updated_at" example:"2021-08-01T00:00:00Z"`
 }

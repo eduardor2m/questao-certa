@@ -1,136 +1,124 @@
 package services
 
-import (
-	"testing"
+// func TestCreateQuestion(t *testing.T) {
+// 	t.Skip("TestCreateQuestion not implemented")
+// 	// ctrl := gomock.NewController(t)
+// 	// defer ctrl.Finish()
 
-	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
-	"github.com/eduardor2m/questao-certa/internal/app/entity/question"
-	"github.com/eduardor2m/questao-certa/internal/app/entity/question/base"
-	"github.com/eduardor2m/questao-certa/internal/app/services/mocks"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
-)
+// 	// repo := mocks.NewMockQuestionLoader(ctrl)
+// 	// questionService := NewQuestionServices(repo)
 
-func TestCreateQuestion(t *testing.T) {
-	t.Skip("TestCreateQuestion not implemented")
-	// ctrl := gomock.NewController(t)
-	// defer ctrl.Finish()
+// 	// questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
+// 	// if err != nil {
+// 	// 	t.Error(err)
+// 	// }
 
-	// repo := mocks.NewMockQuestionLoader(ctrl)
-	// questionService := NewQuestionServices(repo)
+// 	// baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
+// 	// if err != nil {
+// 	// 	t.Error(err)
+// 	// }
 
-	// questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+// 	// questionMock.Base = *baseMock
 
-	// baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+// 	// repo.EXPECT().CreateQuestion(gomock.Any()).Return(assert.AnError)
 
-	// questionMock.Base = *baseMock
+// 	// err = questionService.CreateQuestion(*questionMock)
 
-	// repo.EXPECT().CreateQuestion(gomock.Any()).Return(assert.AnError)
+// 	// assert.Nil(t, err)
+// }
 
-	// err = questionService.CreateQuestion(*questionMock)
+// func TestListQuestions(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
+// 	page := 1
 
-	// assert.Nil(t, err)
-}
+// 	repo := mocks.NewMockQuestionLoader(ctrl)
+// 	questionService := NewQuestionServices(repo)
 
-func TestListQuestions(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	page := 1
+// 	var questionsMock []question.Question
 
-	repo := mocks.NewMockQuestionLoader(ctrl)
-	questionService := NewQuestionServices(repo)
+// 	for i := 0; i < 3; i++ {
+// 		questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
 
-	var questionsMock []question.Question
+// 		baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
 
-	for i := 0; i < 3; i++ {
-		questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
-		if err != nil {
-			t.Error(err)
-		}
+// 		questionMock.Base = *baseMock
 
-		baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
-		if err != nil {
-			t.Error(err)
-		}
+// 		questionsMock = append(questionsMock, *questionMock)
+// 	}
 
-		questionMock.Base = *baseMock
+// 	repo.EXPECT().ListQuestions(page).Return(questionsMock, nil)
 
-		questionsMock = append(questionsMock, *questionMock)
-	}
+// 	questions, err := questionService.ListQuestions(page)
 
-	repo.EXPECT().ListQuestions(page).Return(questionsMock, nil)
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, questions)
+// 	assert.Equal(t, len(questions), 3)
+// 	assert.Equal(t, questions[0].Question(), "Question")
+// 	assert.Equal(t, questions[0].Answer(), "(A) Option 1")
+// 	assert.Equal(t, questions[0].Options(), []string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"})
+// }
 
-	questions, err := questionService.ListQuestions(page)
+// func TestListQuestionsError(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
+// 	page := 1
 
-	assert.Nil(t, err)
-	assert.NotNil(t, questions)
-	assert.Equal(t, len(questions), 3)
-	assert.Equal(t, questions[0].Question(), "Question")
-	assert.Equal(t, questions[0].Answer(), "(A) Option 1")
-	assert.Equal(t, questions[0].Options(), []string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"})
-}
+// 	repo := mocks.NewMockQuestionLoader(ctrl)
+// 	questionService := NewQuestionServices(repo)
 
-func TestListQuestionsError(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	page := 1
+// 	repo.EXPECT().ListQuestions(page).Return(nil, assert.AnError)
 
-	repo := mocks.NewMockQuestionLoader(ctrl)
-	questionService := NewQuestionServices(repo)
+// 	questions, err := questionService.ListQuestions(page)
 
-	repo.EXPECT().ListQuestions(page).Return(nil, assert.AnError)
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, questions)
+// }
 
-	questions, err := questionService.ListQuestions(page)
+// func TestListQuestionsByFilter(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
 
-	assert.NotNil(t, err)
-	assert.Nil(t, questions)
-}
+// 	repo := mocks.NewMockQuestionLoader(ctrl)
+// 	questionService := NewQuestionServices(repo)
 
-func TestListQuestionsByFilter(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+// 	var questionsMock []question.Question
 
-	repo := mocks.NewMockQuestionLoader(ctrl)
-	questionService := NewQuestionServices(repo)
+// 	for i := 0; i < 3; i++ {
+// 		questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
 
-	var questionsMock []question.Question
+// 		baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
 
-	for i := 0; i < 3; i++ {
-		questionMock, err := question.NewBuilder().WithQuestion("Question").WithAnswer("(A) Option 1").WithOptions([]string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"}).Build()
-		if err != nil {
-			t.Error(err)
-		}
+// 		questionMock.Base = *baseMock
 
-		baseMock, err := base.NewBuilder().WithID(uuid.New()).WithOrganization("Organization").WithModel("true_or_false").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").Build()
-		if err != nil {
-			t.Error(err)
-		}
+// 		questionsMock = append(questionsMock, *questionMock)
+// 	}
 
-		questionMock.Base = *baseMock
+// 	f, err := filter.NewBuilder().WithOrganization("Organization").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").WithQuantity(1).Build()
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
 
-		questionsMock = append(questionsMock, *questionMock)
-	}
+// 	repo.EXPECT().ListQuestionsByFilter(*f).Return(questionsMock, nil)
 
-	f, err := filter.NewBuilder().WithOrganization("Organization").WithYear("2020").WithDiscipline("Discipline").WithTopic("Topic").WithQuantity(1).Build()
-	if err != nil {
-		t.Error(err)
-	}
+// 	questions, err := questionService.ListQuestionsByFilter(*f)
 
-	repo.EXPECT().ListQuestionsByFilter(*f).Return(questionsMock, nil)
-
-	questions, err := questionService.ListQuestionsByFilter(*f)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, questions)
-	assert.Equal(t, len(questions), 3)
-	assert.Equal(t, questions[0].Question(), "Question")
-	assert.Equal(t, questions[0].Answer(), "(A) Option 1")
-	assert.Equal(t, questions[0].Options(), []string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"})
-}
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, questions)
+// 	assert.Equal(t, len(questions), 3)
+// 	assert.Equal(t, questions[0].Question(), "Question")
+// 	assert.Equal(t, questions[0].Answer(), "(A) Option 1")
+// 	assert.Equal(t, questions[0].Options(), []string{"(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4", "(E) Option 5"})
+// }

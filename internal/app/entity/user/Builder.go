@@ -65,6 +65,11 @@ func (instance *Builder) WithAdmin(admin bool) *Builder {
 	return instance
 }
 
+func (instance *Builder) WithIsActive(isActive bool) *Builder {
+	instance.isActive = isActive
+	return instance
+}
+
 func (instance *Builder) WithCreatedAt(created_at time.Time) *Builder {
 	instance.created_at = created_at
 	return instance

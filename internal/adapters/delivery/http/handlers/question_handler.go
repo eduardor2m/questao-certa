@@ -27,7 +27,7 @@ type QuestionHandler struct {
 // @Success 201 {object} response.InfoResponse "Questão criada com sucesso"
 // @Failure 400 {object} response.ErrorResponse "Erro ao criar questão"
 // @Router /question [post]
-func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
+func (instance QuestionHandler) Create(context echo.Context) error {
 	var questionDTO request.QuestionDTO
 
 	err := context.Bind(&questionDTO)
@@ -47,7 +47,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 
 	questionReceived.Base = *baseReceived
 
-	err = instance.service.CreateQuestion(*questionReceived)
+	err = instance.service.Create(*questionReceived)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -65,7 +65,7 @@ func (instance QuestionHandler) CreateQuestion(context echo.Context) error {
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /question/import [post]
-func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error {
+func (instance QuestionHandler) ImportByCSV(context echo.Context) error {
 	file, err := context.FormFile("file")
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -76,7 +76,7 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	err = instance.service.ImportQuestionsByCSV(fileOpened)
+	err = instance.service.ImportByCSV(fileOpened)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -94,13 +94,13 @@ func (instance QuestionHandler) ImportQuestionsByCSV(context echo.Context) error
 // @Success 200 {array} response.Question
 // @Failure 400 {object} response.ErrorResponse
 // @Router /question/{page} [get]
-func (instance QuestionHandler) ListQuestions(context echo.Context) error {
+func (instance QuestionHandler) List(context echo.Context) error {
 	page := context.Param("page")
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
-	questionsReceivedDB, err := instance.service.ListQuestions(pageInt)
+	questionsReceivedDB, err := instance.service.List(pageInt)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -142,7 +142,7 @@ func (instance QuestionHandler) ListQuestions(context echo.Context) error {
 // @Success 200 {array} response.Question
 // @Failure 400 {object} response.ErrorResponse
 // @Router /question/filter [post]
-func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) error {
+func (instance QuestionHandler) ListByFilter(context echo.Context) error {
 	filterReceived := request.FilterDTO{}
 
 	err := context.Bind(&filterReceived)
@@ -156,7 +156,7 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	questionsReceivedDB, err := instance.service.ListQuestionsByFilter(*filterFormatted)
+	questionsReceivedDB, err := instance.service.ListByFilter(*filterFormatted)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -198,10 +198,10 @@ func (instance QuestionHandler) ListQuestionsByFilter(context echo.Context) erro
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /question/{id} [delete]
-func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
+func (instance QuestionHandler) DeleteByID(context echo.Context) error {
 	id := context.Param("id")
 
-	err := instance.service.DeleteQuestion(id)
+	err := instance.service.DeleteByID(id)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -218,8 +218,8 @@ func (instance QuestionHandler) DeleteQuestion(context echo.Context) error {
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /question [delete]
-func (instance QuestionHandler) DeleteAllQuestions(context echo.Context) error {
-	err := instance.service.DeleteAllQuestions()
+func (instance QuestionHandler) DeleteAll(context echo.Context) error {
+	err := instance.service.DeleteAll()
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}

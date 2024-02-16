@@ -1,23 +1,23 @@
--- name: SignUp :exec
+-- name: Register :exec
 
-INSERT INTO "user" ("id", "name", "email", "password", "admin", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7);
+INSERT INTO "user" ("id", "name", "email", "password", "admin", "is_active", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 
--- name: SignIn :one
+-- name: Authenticate :one
 
 SELECT * FROM "user" WHERE "email" = $1 LIMIT 1;
 
--- name: DeleteUserTest :exec
+-- name: Delete :exec
 
-DELETE FROM "user" WHERE "email" = $1 AND "name" = $2;
+UPDATE "user" SET "is_active" = false WHERE "email" = $1 and "is_active" = true and "admin" = false and "name" = $2;
 
--- name: ListUsers :many
+-- name: List :many
 
 SELECT * FROM "user" ORDER BY "created_at" DESC;
 
--- name: GetUserByEmail :one
+-- name: FindByEmail :one
 
 SELECT * FROM "user" WHERE "email" = $1 LIMIT 1;
 
--- name: VerifyUserIsLoggedOrAdmin :one
+-- name: CheckType :one
 
 SELECT * FROM "user" WHERE "id" = $1 LIMIT 1;

@@ -12,9 +12,9 @@ func loadUserRoutes(group *echo.Group) {
 	userHandlers := dicontainer.GetUserHandler()
 
 	userGroup.POST("", userHandlers.Register)
-	userGroup.POST("/signin", userHandlers.Authenticate)
-	userGroup.GET("/verify", middlewares.Admin(userHandlers.CheckType))
-	userGroup.GET("/list", middlewares.Admin(userHandlers.List))
+	userGroup.POST("/authenticate", userHandlers.Authenticate)
+	userGroup.GET("/checktype", middlewares.GuardMiddleware(userHandlers.CheckType))
+	userGroup.GET("", middlewares.Admin(userHandlers.List))
 	userGroup.GET("/:email", middlewares.Admin(userHandlers.FindByEmail))
-	userGroup.DELETE("/delete", middlewares.Admin(userHandlers.Delete))
+	userGroup.DELETE("", middlewares.Admin(userHandlers.Delete))
 }

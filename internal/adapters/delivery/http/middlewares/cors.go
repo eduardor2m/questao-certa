@@ -10,6 +10,7 @@ func VerifyOrigin(origin string) (bool, error) {
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://localhost:8080",
+		"http://localhost:8180",
 	}
 
 	for _, allowedOrigin := range allowedOrigins {

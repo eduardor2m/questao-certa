@@ -27,7 +27,7 @@ func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 
 		if *userType != "admin" {
 			return context.JSON(401, map[string]string{
-				"message": "user not admin, user type is: " + *userType,
+				"message": "user unauthorized, only admin can access this resource",
 			})
 		}
 

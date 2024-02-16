@@ -34,14 +34,17 @@ func (instance UserPostgresRepository) Register(u user.User) error {
 
 	queries := bridge.New(conn)
 
-	err = queries.SignUp(ctx, bridge.SignUpParams{
+	timeNow := time.Now()
+
+	err = queries.Register(ctx, bridge.RegisterParams{
 		ID:        u.ID(),
 		Name:      u.Name(),
 		Email:     u.Email(),
 		Password:  u.Password(),
-		Admin:     false,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Admin:     true,
+		IsActive:  true,
+		CreatedAt: timeNow,
+		UpdatedAt: timeNow,
 	})
 
 	if err != nil {
@@ -63,7 +66,7 @@ func (instance UserPostgresRepository) Authenticate(email string, password strin
 
 	queries := bridge.New(conn)
 
-	userDB, err := queries.SignIn(ctx, email)
+	userDB, err := queries.Authenticate(ctx, email)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %v", err)
@@ -106,7 +109,7 @@ func (instance UserPostgresRepository) List() ([]user.User, error) {
 
 	queries := bridge.New(conn)
 
-	usersDB, err := queries.ListUsers(ctx)
+	usersDB, err := queries.List(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting users: %v", err)
@@ -115,7 +118,7 @@ func (instance UserPostgresRepository) List() ([]user.User, error) {
 	users := make([]user.User, 0)
 
 	for _, userDB := range usersDB {
-		userFormatted, err := user.NewBuilder().WithID(userDB.ID).WithCreatedAt(userDB.CreatedAt).WithUpdatedAt(userDB.UpdatedAt).WithAdmin(userDB.Admin).WithName(userDB.Name).WithEmail(userDB.Email).WithPassword(userDB.Password).Build()
+		userFormatted, err := user.NewBuilder().WithID(userDB.ID).WithIsActive(userDB.IsActive).WithCreatedAt(userDB.CreatedAt).WithUpdatedAt(userDB.UpdatedAt).WithAdmin(userDB.Admin).WithName(userDB.Name).WithEmail(userDB.Email).WithPassword(userDB.Password).Build()
 		if err != nil {
 			return nil, fmt.Errorf("error formatting user: %v", err)
 		}
@@ -138,7 +141,7 @@ func (instance UserPostgresRepository) FindByEmail(email string) (*user.User, er
 
 	queries := bridge.New(conn)
 
-	userDB, err := queries.GetUserByEmail(ctx, email)
+	userDB, err := queries.FindByEmail(ctx, email)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %v", err)
@@ -181,7 +184,7 @@ func (instance UserPostgresRepository) CheckType(tokenJwt string) (*string, erro
 		return nil, fmt.Errorf("error parsing user id: %v", err)
 	}
 
-	userDB, err := queries.VerifyUserIsLoggedOrAdmin(ctx, userIdUUID)
+	userDB, err := queries.CheckType(ctx, userIdUUID)
 
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %v", err)
@@ -211,23 +214,28 @@ func (instance UserPostgresRepository) Delete(email string, name string) error {
 
 	queries := bridge.New(conn)
 
-	userDB, err := queries.GetUserByEmail(ctx, email)
+	userDB, err := queries.FindByEmail(ctx, email)
 	if err != nil {
 		return fmt.Errorf("error getting user: %v", err)
 	}
 
-	if userDB.Admin {
+	switch {
+	case userDB.Name != name:
+		return fmt.Errorf("error deleting user: name does not match")
+	case userDB.Email != email:
+		return fmt.Errorf("error deleting user: email does not match")
+	case !userDB.IsActive:
+		return fmt.Errorf("error deleting user: user is not active")
+	case userDB.Admin:
 		return fmt.Errorf("error deleting user: user is admin")
 	}
 
-	if userDB.Name != name {
-		return fmt.Errorf("error deleting user: user name does not match")
-	}
-
-	err = queries.DeleteUserTest(ctx, bridge.DeleteUserTestParams{
-		Email: email,
-		Name:  name,
-	})
+	err = queries.Delete(ctx,
+		bridge.DeleteParams{
+			Email: email,
+			Name:  name,
+		},
+	)
 
 	if err != nil {
 		return fmt.Errorf("error deleting user: %v", err)

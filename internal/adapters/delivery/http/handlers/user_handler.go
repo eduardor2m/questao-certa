@@ -77,15 +77,22 @@ func (instance UserHandler) Authenticate(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User logged successfully"})
 }
 
+// @Summary Deleta um usuário
+// @Description Deleta um usuário
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user body request.UserDeleteDTO true "Dados do usuário"
+// @Success 200 {object} response.InfoResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Router /user [delete]
 func (instance UserHandler) Delete(context echo.Context) error {
-	type UserDeleteDTO struct {
-		Email string `json:"email"`
-		Name  string `json:"name"`
-	}
-
-	var userDTO UserDeleteDTO
+	var userDTO request.UserDeleteDTO
 
 	err := context.Bind(&userDTO)
+	if err != nil {
+		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
+	}
 
 	err = instance.service.Delete(userDTO.Email, userDTO.Name)
 
@@ -96,6 +103,14 @@ func (instance UserHandler) Delete(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User deleted successfully"})
 }
 
+// @Summary Lista os usuários
+// @Description Lista os usuários
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} []response.UserDTO
+// @Failure 400 {object} response.ErrorResponse
+// @Router /user [get]
 func (instance UserHandler) List(context echo.Context) error {
 	users, err := instance.service.List()
 	if err != nil {
@@ -111,6 +126,7 @@ func (instance UserHandler) List(context echo.Context) error {
 			Email:     user.Email(),
 			Password:  user.Password(),
 			Admin:     user.Admin(),
+			IsActive:  user.IsActive(),
 			CreatedAt: user.CreatedAt().Format("2006-01-02T15:04:05Z"),
 			UpdatedAt: user.UpdatedAt().Format("2006-01-02T15:04:05Z"),
 		}
@@ -121,6 +137,15 @@ func (instance UserHandler) List(context echo.Context) error {
 	return context.JSON(http.StatusOK, usersJson)
 }
 
+// @Summary Busca um usuário pelo email
+// @Description Busca um usuário pelo email
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param email path string true "Email do usuário"
+// @Success 200 {object} response.UserDTO
+// @Failure 400 {object} response.ErrorResponse
+// @Router /user/{email} [get]
 func (instance UserHandler) FindByEmail(context echo.Context) error {
 	email := context.Param("email")
 
@@ -166,7 +191,7 @@ func (instance UserHandler) CheckType(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	return context.JSON(http.StatusOK, response.InfoResponse{Message: *message})
+	return context.JSON(http.StatusOK, response.InfoResponse{Message: "user type is: " + *message})
 }
 
 func NewUserHandler(service primary.UserManager) *UserHandler {

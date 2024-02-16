@@ -6,10 +6,10 @@ import (
 )
 
 type QuestionLoader interface {
-	CreateQuestion(Question question.Question) error
-	ImportQuestionsByCSV(questions []question.Question) error
-	ListQuestions(page int) ([]question.Question, error)
-	ListQuestionsByFilter(filter filter.Filter) ([]question.Question, error)
-	DeleteQuestion(id string) error
-	DeleteAllQuestions() error
+	Create(Question question.Question) error
+	ImportByCSV(questions []question.Question) error
+	List(page int) ([]question.Question, error)
+	ListByFilter(filter filter.Filter) ([]question.Question, error)
+	DeleteByID(id string) error
+	DeleteAll() error
 }

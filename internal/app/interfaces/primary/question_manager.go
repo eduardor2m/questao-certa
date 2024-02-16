@@ -8,10 +8,10 @@ import (
 )
 
 type QuestionManager interface {
-	CreateQuestion(questionReceived question.Question) error
-	ImportQuestionsByCSV(multipart.File) error
-	ListQuestions(page int) ([]question.Question, error)
-	ListQuestionsByFilter(filterReceived filter.Filter) ([]question.Question, error)
-	DeleteQuestion(id string) error
-	DeleteAllQuestions() error
+	Create(questionReceived question.Question) error
+	ImportByCSV(multipart.File) error
+	List(page int) ([]question.Question, error)
+	ListByFilter(filterReceived filter.Filter) ([]question.Question, error)
+	DeleteByID(id string) error
+	DeleteAll() error
 }

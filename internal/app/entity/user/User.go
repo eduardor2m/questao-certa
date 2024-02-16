@@ -12,6 +12,7 @@ type User struct {
 	email      string
 	password   string
 	admin      bool
+	isActive   bool
 	created_at time.Time
 	updated_at time.Time
 }
@@ -34,6 +35,10 @@ func (instance *User) Password() string {
 
 func (instance *User) Admin() bool {
 	return instance.admin
+}
+
+func (instance *User) IsActive() bool {
+	return instance.isActive
 }
 
 func (instance *User) CreatedAt() time.Time {

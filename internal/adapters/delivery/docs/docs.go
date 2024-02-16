@@ -277,6 +277,36 @@ const docTemplate = `{
             }
         },
         "/user": {
+            "get": {
+                "description": "Lista os usuários",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Lista os usuários",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.UserDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Cria um usuário",
                 "consumes": [
@@ -309,6 +339,44 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Erro ao criar usuário",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deleta um usuário",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Deleta um usuário",
+                "parameters": [
+                    {
+                        "description": "Dados do usuário",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserDeleteDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
@@ -358,7 +426,7 @@ const docTemplate = `{
         },
         "/user/verify": {
             "get": {
-                "description": "Verifica se o usuário está logado ou é admin",
+                "description": "Verifica o tipo do usuário",
                 "consumes": [
                     "application/json"
                 ],
@@ -368,7 +436,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Verifica se o usuário está logado ou é admin",
+                "summary": "Verifica o tipo do usuário",
                 "parameters": [
                     {
                         "type": "string",
@@ -383,6 +451,44 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{email}": {
+            "get": {
+                "description": "Busca um usuário pelo email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Busca um usuário pelo email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email do usuário",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.UserDTO"
                         }
                     },
                     "400": {
@@ -483,6 +589,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.UserDeleteDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "request.UserLoginDTO": {
             "type": "object",
             "properties": {
@@ -518,6 +635,9 @@ const docTemplate = `{
                 "answer": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "discipline": {
                     "type": "string"
                 },
@@ -542,8 +662,48 @@ const docTemplate = `{
                 "topic": {
                     "type": "string"
                 },
+                "updated_at": {
+                    "type": "string"
+                },
                 "year": {
                     "type": "string"
+                }
+            }
+        },
+        "response.UserDTO": {
+            "type": "object",
+            "properties": {
+                "admin": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2021-08-01T00:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "dudu@gmail.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Eduardo Melo"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2021-08-01T00:00:00Z"
                 }
             }
         }
