@@ -17,7 +17,7 @@ func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userServices := dicontainer.GetUserServices()
 
-		userType, err := userServices.VerifyUserIsLoggedOrAdmin(tokenAuthHeader[7:])
+		userType, err := userServices.CheckType(tokenAuthHeader[7:])
 
 		if err != nil {
 			return context.JSON(401, map[string]string{

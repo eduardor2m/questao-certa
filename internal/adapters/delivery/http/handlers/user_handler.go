@@ -23,7 +23,7 @@ type UserHandler struct {
 // @Success 201 {object} response.InfoResponse "Usuário criado com sucesso"
 // @Failure 400 {object} response.ErrorResponse "Erro ao criar usuário"
 // @Router /user [post]
-func (instance UserHandler) SignUp(context echo.Context) error {
+func (instance UserHandler) Register(context echo.Context) error {
 	var userDTO request.UserDTO
 
 	err := context.Bind(&userDTO)
@@ -38,7 +38,7 @@ func (instance UserHandler) SignUp(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	err = instance.service.SignUp(*userReceiced)
+	err = instance.service.Register(*userReceiced)
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -56,7 +56,7 @@ func (instance UserHandler) SignUp(context echo.Context) error {
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /user/signin [post]
-func (instance UserHandler) SignIn(context echo.Context) error {
+func (instance UserHandler) Authenticate(context echo.Context) error {
 	var userDTO request.UserDTO
 
 	err := context.Bind(&userDTO)
@@ -65,7 +65,7 @@ func (instance UserHandler) SignIn(context echo.Context) error {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
 
-	token, err := instance.service.SignIn(userDTO.Email, userDTO.Password)
+	token, err := instance.service.Authenticate(userDTO.Email, userDTO.Password)
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -77,7 +77,7 @@ func (instance UserHandler) SignIn(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User logged successfully"})
 }
 
-func (instance UserHandler) DeleteUserTest(context echo.Context) error {
+func (instance UserHandler) Delete(context echo.Context) error {
 	type UserDeleteDTO struct {
 		Email string `json:"email"`
 		Name  string `json:"name"`
@@ -87,7 +87,7 @@ func (instance UserHandler) DeleteUserTest(context echo.Context) error {
 
 	err := context.Bind(&userDTO)
 
-	err = instance.service.DeleteUserTest(userDTO.Email, userDTO.Name)
+	err = instance.service.Delete(userDTO.Email, userDTO.Name)
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
@@ -96,8 +96,8 @@ func (instance UserHandler) DeleteUserTest(context echo.Context) error {
 	return context.JSON(http.StatusOK, response.InfoResponse{Message: "User deleted successfully"})
 }
 
-func (instance UserHandler) ListUsers(context echo.Context) error {
-	users, err := instance.service.ListUsers()
+func (instance UserHandler) List(context echo.Context) error {
+	users, err := instance.service.List()
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -121,10 +121,10 @@ func (instance UserHandler) ListUsers(context echo.Context) error {
 	return context.JSON(http.StatusOK, usersJson)
 }
 
-func (instance UserHandler) GetUserByEmail(context echo.Context) error {
+func (instance UserHandler) FindByEmail(context echo.Context) error {
 	email := context.Param("email")
 
-	user, err := instance.service.GetUserByEmail(email)
+	user, err := instance.service.FindByEmail(email)
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
 	}
@@ -142,8 +142,8 @@ func (instance UserHandler) GetUserByEmail(context echo.Context) error {
 	return context.JSON(http.StatusOK, userJson)
 }
 
-// @Summary Verifica se o usuário está logado ou é admin
-// @Description Verifica se o usuário está logado ou é admin
+// @Summary Verifica o tipo do usuário
+// @Description Verifica o tipo do usuário
 // @Tags User
 // @Accept json
 // @Produce json
@@ -151,7 +151,7 @@ func (instance UserHandler) GetUserByEmail(context echo.Context) error {
 // @Success 200 {object} response.InfoResponse
 // @Failure 400 {object} response.ErrorResponse
 // @Router /user/verify [get]
-func (instance UserHandler) VerifyUserIsLoggedOrAdmin(context echo.Context) error {
+func (instance UserHandler) CheckType(context echo.Context) error {
 	token := context.Request().Header.Get("Authorization")
 
 	if token == "" {
@@ -160,7 +160,7 @@ func (instance UserHandler) VerifyUserIsLoggedOrAdmin(context echo.Context) erro
 
 	tokenFormatted := token[7:]
 
-	message, err := instance.service.VerifyUserIsLoggedOrAdmin(tokenFormatted)
+	message, err := instance.service.CheckType(tokenFormatted)
 
 	if err != nil {
 		return context.JSON(http.StatusBadRequest, response.ErrorResponse{Message: err.Error()})
