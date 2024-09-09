@@ -12,6 +12,8 @@ type Question struct {
 	Question     string    `json:"question"`
 	Answer       string    `json:"answer"`
 	Options      []string  `json:"options"`
+	CreatedAt    string    `json:"created_at"`
+	UpdatedAt    string    `json:"updated_at"`
 }
 
 type ErrorResponse struct {

@@ -13,7 +13,9 @@ func TestSignIn(t *testing.T) {
 	userData := data.GetSignInMock(filenames.SignInMock)
 	requestBody := bytes.NewReader(userData)
 
-	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/user/signin", requestBody)
+	// Create a new request
+
+	clientRequest, err := http.NewRequest("POST", baseURL+"/user/signin", requestBody)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)
@@ -39,7 +41,9 @@ func TestSignUp(t *testing.T) {
 	userData := data.GetSignUpMock(filenames.SignUpMock)
 	requestBody := bytes.NewReader(userData)
 
-	clientRequest, err := http.NewRequest("POST", "http://questao-certa-air:8080/api/user", requestBody)
+	requestBody = bytes.NewReader(userData)
+
+	clientRequest, err := http.NewRequest("POST", baseURL+"/user", requestBody)
 
 	if err != nil {
 		t.Errorf("Erro ao criar a solicitação: %v", err)

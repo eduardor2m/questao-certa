@@ -22,7 +22,7 @@ type QuestionServices struct {
 	questionRepository repository.QuestionLoader
 }
 
-func (instance *QuestionServices) CreateQuestion(questionReceived question.Question) error {
+func (instance *QuestionServices) Create(questionReceived question.Question) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
@@ -40,14 +40,14 @@ func (instance *QuestionServices) CreateQuestion(questionReceived question.Quest
 
 	questionFormatted.Base = *baseFormatted
 
-	return instance.questionRepository.CreateQuestion(*questionFormatted)
+	return instance.questionRepository.Create(*questionFormatted)
 }
 
-func (instance *QuestionServices) ListQuestions(page int) ([]question.Question, error) {
-	return instance.questionRepository.ListQuestions(page)
+func (instance *QuestionServices) List(page int) ([]question.Question, error) {
+	return instance.questionRepository.List(page)
 }
 
-func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) error {
+func (instance *QuestionServices) ImportByCSV(file multipart.File) error {
 	reader := csv.NewReader(file)
 	reader.Comma = ','
 
@@ -91,23 +91,23 @@ func (instance *QuestionServices) ImportQuestionsByCSV(file multipart.File) erro
 
 	wg.Wait()
 
-	return instance.questionRepository.ImportQuestionsByCSV(allQuestions)
+	return instance.questionRepository.ImportByCSV(allQuestions)
 }
 
-func (instance *QuestionServices) ListQuestionsByFilter(filterReceived filter.Filter) ([]question.Question, error) {
+func (instance *QuestionServices) ListByFilter(filterReceived filter.Filter) ([]question.Question, error) {
 	if filterReceived.Quantity() > 10 {
 		return nil, errors.New("quantity must be less than 10")
 	}
 
-	return instance.questionRepository.ListQuestionsByFilter(filterReceived)
+	return instance.questionRepository.ListByFilter(filterReceived)
 }
 
-func (instance *QuestionServices) DeleteQuestion(id string) error {
-	return instance.questionRepository.DeleteQuestion(id)
+func (instance *QuestionServices) DeleteByID(id string) error {
+	return instance.questionRepository.DeleteByID(id)
 }
 
-func (instance *QuestionServices) DeleteAllQuestions() error {
-	return instance.questionRepository.DeleteAllQuestions()
+func (instance *QuestionServices) DeleteAll() error {
+	return instance.questionRepository.DeleteAll()
 }
 
 func NewQuestionServices(questionRepository repository.QuestionLoader) *QuestionServices {

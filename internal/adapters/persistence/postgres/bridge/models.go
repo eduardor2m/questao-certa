@@ -16,6 +16,7 @@ type User struct {
 	Email     string
 	Password  string
 	Admin     bool
+	IsActive  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

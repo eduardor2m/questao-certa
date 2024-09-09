@@ -2,6 +2,7 @@ package base
 
 import (
 	"errors"
+	"time"
 
 	"github.com/eduardor2m/questao-certa/internal/app/utils/validator"
 	"github.com/google/uuid"
@@ -75,6 +76,16 @@ func (instance *Builder) WithTopic(topic string) *Builder {
 		return instance
 	}
 	instance.topic = topic
+	return instance
+}
+
+func (instance *Builder) WithCreatedAt(created_at time.Time) *Builder {
+	instance.created_at = created_at
+	return instance
+}
+
+func (instance *Builder) WithUpdatedAt(updated_at time.Time) *Builder {
+	instance.updated_at = updated_at
 	return instance
 }
 

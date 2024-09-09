@@ -12,13 +12,13 @@ import (
 	"github.com/google/uuid"
 )
 
-const signIn = `-- name: SignIn :one
+const authenticate = `-- name: Authenticate :one
 
-SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1
+SELECT id, name, email, password, admin, is_active, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1
 `
 
-func (q *Queries) SignIn(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, signIn, email)
+func (q *Queries) Authenticate(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, authenticate, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -26,56 +26,133 @@ func (q *Queries) SignIn(ctx context.Context, email string) (User, error) {
 		&i.Email,
 		&i.Password,
 		&i.Admin,
+		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const signUp = `-- name: SignUp :exec
+const checkType = `-- name: CheckType :one
 
-INSERT INTO "user" ("id", "name", "email", "password", "admin", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7)
+SELECT id, name, email, password, admin, is_active, created_at, updated_at FROM "user" WHERE "id" = $1 LIMIT 1
 `
 
-type SignUpParams struct {
+func (q *Queries) CheckType(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, checkType, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.Admin,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const delete = `-- name: Delete :exec
+
+UPDATE "user" SET "is_active" = false WHERE "email" = $1 and "is_active" = true and "admin" = false and "name" = $2 RETURNING id, name, email, password, admin, is_active, created_at, updated_at
+`
+
+type DeleteParams struct {
+	Email string
+	Name  string
+}
+
+func (q *Queries) Delete(ctx context.Context, arg DeleteParams) error {
+	_, err := q.db.ExecContext(ctx, delete, arg.Email, arg.Name)
+	return err
+}
+
+const findByEmail = `-- name: FindByEmail :one
+
+SELECT id, name, email, password, admin, is_active, created_at, updated_at FROM "user" WHERE "email" = $1 LIMIT 1
+`
+
+func (q *Queries) FindByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, findByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.Admin,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const list = `-- name: List :many
+
+SELECT id, name, email, password, admin, is_active, created_at, updated_at FROM "user" ORDER BY "created_at" DESC
+`
+
+func (q *Queries) List(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, list)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Password,
+			&i.Admin,
+			&i.IsActive,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const register = `-- name: Register :exec
+
+INSERT INTO "user" ("id", "name", "email", "password", "admin", "is_active", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+`
+
+type RegisterParams struct {
 	ID        uuid.UUID
 	Name      string
 	Email     string
 	Password  string
 	Admin     bool
+	IsActive  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (q *Queries) SignUp(ctx context.Context, arg SignUpParams) error {
-	_, err := q.db.ExecContext(ctx, signUp,
+func (q *Queries) Register(ctx context.Context, arg RegisterParams) error {
+	_, err := q.db.ExecContext(ctx, register,
 		arg.ID,
 		arg.Name,
 		arg.Email,
 		arg.Password,
 		arg.Admin,
+		arg.IsActive,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
 	return err
-}
-
-const verifyUserIsLoggedOrAdmin = `-- name: VerifyUserIsLoggedOrAdmin :one
-
-SELECT id, name, email, password, admin, created_at, updated_at FROM "user" WHERE "id" = $1 LIMIT 1
-`
-
-func (q *Queries) VerifyUserIsLoggedOrAdmin(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, verifyUserIsLoggedOrAdmin, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Password,
-		&i.Admin,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }

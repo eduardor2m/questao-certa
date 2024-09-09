@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/eduardor2m/questao-certa/internal/adapters/persistence/mongodb/utils/dtos"
 	"github.com/eduardor2m/questao-certa/internal/app/entity/filter"
@@ -31,7 +32,7 @@ func mapBSONToQuestions(c *mongo.Cursor, ctx context.Context) ([]question.Questi
 	var questionFormattedDB []question.Question
 
 	for _, questionDB := range questionsDB {
-		baseFormatted, err := base.NewBuilder().WithID(questionDB.ID).WithOrganization(questionDB.Organization).WithModel(questionDB.Model).WithYear(questionDB.Year).WithDiscipline(questionDB.Discipline).WithTopic(questionDB.Topic).Build()
+		baseFormatted, err := base.NewBuilder().WithID(questionDB.ID).WithOrganization(questionDB.Organization).WithModel(questionDB.Model).WithYear(questionDB.Year).WithDiscipline(questionDB.Discipline).WithTopic(questionDB.Topic).WithCreatedAt(questionDB.CreatedAt).WithUpdatedAt(questionDB.UpdatedAt).Build()
 
 		if err != nil {
 			return nil, err
@@ -50,7 +51,7 @@ func mapBSONToQuestions(c *mongo.Cursor, ctx context.Context) ([]question.Questi
 	return questionFormattedDB, nil
 }
 
-func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived question.Question) error {
+func (instance *QuestionMongodbRepository) Create(questionReceived question.Question) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
@@ -59,6 +60,8 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 	defer instance.closeConnection(conn)
 
 	ctx := context.Background()
+
+	dateNow := time.Now()
 
 	document := bson.M{
 		"id":           questionReceived.ID(),
@@ -70,6 +73,8 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 		"question":     questionReceived.Question(),
 		"answer":       questionReceived.Answer(),
 		"options":      questionReceived.Options(),
+		"created_at":   dateNow,
+		"updated_at":   dateNow,
 	}
 
 	collectionName := os.Getenv("MONGODB_COLLECTION")
@@ -82,7 +87,7 @@ func (instance *QuestionMongodbRepository) CreateQuestion(questionReceived quest
 	return nil
 }
 
-func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceived []question.Question) error {
+func (instance *QuestionMongodbRepository) ImportByCSV(questionsReceived []question.Question) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
@@ -91,6 +96,8 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 	ctx := context.Background()
 
 	var documents []interface{}
+
+	dateNow := time.Now()
 
 	for _, questionReceived := range questionsReceived {
 		document := bson.M{
@@ -103,6 +110,8 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 			"question":     questionReceived.Question(),
 			"answer":       questionReceived.Answer(),
 			"options":      questionReceived.Options(),
+			"created_at":   dateNow,
+			"updated_at":   dateNow,
 		}
 
 		documents = append(documents, document)
@@ -117,7 +126,7 @@ func (instance *QuestionMongodbRepository) ImportQuestionsByCSV(questionsReceive
 	return nil
 }
 
-func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Question, error) {
+func (instance *QuestionMongodbRepository) List(page int) ([]question.Question, error) {
 	ctx := context.Background()
 	perPage := 3
 	collectionName := os.Getenv("MONGODB_COLLECTION")
@@ -141,7 +150,7 @@ func (instance *QuestionMongodbRepository) ListQuestions(page int) ([]question.Q
 	return mapBSONToQuestions(cursor, ctx)
 }
 
-func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter) ([]question.Question, error) {
+func (instance *QuestionMongodbRepository) ListByFilter(f filter.Filter) ([]question.Question, error) {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return nil, err
@@ -185,7 +194,7 @@ func (instance *QuestionMongodbRepository) ListQuestionsByFilter(f filter.Filter
 	return mapBSONToQuestions(cursor, ctx)
 }
 
-func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
+func (instance *QuestionMongodbRepository) DeleteByID(id string) error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err
@@ -205,7 +214,7 @@ func (instance *QuestionMongodbRepository) DeleteQuestion(id string) error {
 	return nil
 }
 
-func (instance *QuestionMongodbRepository) DeleteAllQuestions() error {
+func (instance *QuestionMongodbRepository) DeleteAll() error {
 	conn, err := instance.connectorManager.getConnection()
 	if err != nil {
 		return err

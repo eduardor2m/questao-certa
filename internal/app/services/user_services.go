@@ -15,7 +15,7 @@ type UserServices struct {
 	userRepository repository.UserLoader
 }
 
-func (instance *UserServices) SignUp(userReceiced user.User) error {
+func (instance *UserServices) Register(userReceiced user.User) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
@@ -33,15 +33,27 @@ func (instance *UserServices) SignUp(userReceiced user.User) error {
 		return err
 	}
 
-	return instance.userRepository.SignUp(*userFormatted)
+	return instance.userRepository.Register(*userFormatted)
 }
 
-func (instance *UserServices) SignIn(email string, password string) (*string, error) {
-	return instance.userRepository.SignIn(email, password)
+func (instance *UserServices) Authenticate(email string, password string) (*string, error) {
+	return instance.userRepository.Authenticate(email, password)
 }
 
-func (instance *UserServices) VerifyUserIsLoggedOrAdmin(token string) (*string, error) {
-	return instance.userRepository.VerifyUserIsLoggedOrAdmin(token)
+func (instance *UserServices) Delete(email string, username string) error {
+	return instance.userRepository.Delete(email, username)
+}
+
+func (instance *UserServices) List() ([]user.User, error) {
+	return instance.userRepository.List()
+}
+
+func (instance *UserServices) FindByEmail(email string) (*user.User, error) {
+	return instance.userRepository.FindByEmail(email)
+}
+
+func (instance *UserServices) CheckType(token string) (*string, error) {
+	return instance.userRepository.CheckType(token)
 }
 
 func NewUserServices(userRepository repository.UserLoader) *UserServices {

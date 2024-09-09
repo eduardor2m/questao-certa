@@ -1,0 +1,1 @@
+-- INSERT INTO "user" (id, name, email, password, admin) VALUES ('3546bb26-6f1c-413f-85f5-f609aa1b0c4e', 'Eduardo Admin', 'eduardo_admin@gmail.com', 'Wqwe12345678.', true);
